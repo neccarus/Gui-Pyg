@@ -41,6 +41,6 @@ class ElementGroup(Element):
 
         return adj_mouse_pos_x, adj_mouse_pos_y
 
-    def click(self, mouse_pos=(0, 0)):
+    def click(self, mouse_pos=(0, 0), *args, **kwargs):
         for element in self.elements:
-            element.click(element.get_mouse_pos((self.get_mouse_pos(mouse_pos))))
+            element.click(element.get_mouse_pos((self.get_mouse_pos(mouse_pos))), *args, **kwargs)
