@@ -18,8 +18,8 @@ class Button(ToggleableElement):
                 self.pos_y <= mouse_pos_y <= (self.pos_y + self.height):
             self.toggle_click()
 
-    def click(self, mouse_pos=(0, 0)):
+    def click(self, mouse_pos=(0, 0), *args, **kwargs):
         self.get_click(mouse_pos)
         if self.toggle:
             self.toggle_click()
-            return self.function()
+            return self.function(mouse_pos, *args, **kwargs)

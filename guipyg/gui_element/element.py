@@ -22,13 +22,18 @@ class Element(pygame.Surface):
         self.name = name
         self.color = color
         self.style = style
-        self.rect = pygame.Rect((self.pos_x, self.pos_y), (self.height, self.width))
+        self.rect = pygame.Rect((0, 0), (self.width, self.height))
         self.class_name = self.my_name()
 
     def get_mouse_pos(self, mouse_pos=(0, 0)):
         # for compatibility with ElementGroup
         return mouse_pos
 
+    # def fill_elements(self):
+    #     for index, element in enumerate(self.elements):
+    #         if hasattr(self.elements[index], "elements"):
+    #             element.fill_elements()
+    #         element.fill(element.color, element.rect)
 
 
 class ElementEncoder(JSONEncoder):

@@ -14,22 +14,27 @@ class_types = {"Element": Element, "Button": Button, "Popup": Popup, "Toggleable
 
 class GUI(pygame.Surface):
 
-    def __init__(self, surface="default", length=0, height=0, pos_x=0, pos_y=0, elements=[], *_):
+    def __init__(self, surface=pygame.Surface, length=0, height=0, pos_x=0, pos_y=0, elements=[], *_):
         self.length = length
         self.height = height
-        super().__init__((length, height))
+        super().__init__((self.length, self.height))
         self.surface = surface  # passed in as a string as json doesn't want to encode pygame.Surface objects
         self.pos_x = pos_x
         self.pos_y = pos_y
         self.elements = elements
 
     def blit_elements(self):
-        for element in self.elements:
-            element.blit(self, (element.pos_x, element.pos_y))
+        for index, element in enumerate(self.elements):
+            if hasattr(self.elements[index], "elements"):
+                element.blit_elements()
+            self.blit(element, (element.pos_x, element.pos_y))
 
     def fill_elements(self):
-        for element in self.elements:
+        for index, element in enumerate(self.elements):
+            if hasattr(self.elements[index], "elements"):
+                element.fill_elements()
             element.fill(element.color, element.rect)
+            # element.blit(element, (0, 0))
 
 
 class GUIEncoder(JSONEncoder):

@@ -13,15 +13,21 @@ class ElementGroup(Element):
         self.name = name
         self.color = color
         self.style = style
-        super().__init__()
         self.pos_x = pos_x
         self.pos_y = pos_y
+        super().__init__(width, height, pos_x, pos_y, name, color, style)
         self.elements = elements
         self.class_name = self.my_name()
 
     def blit_elements(self):
         for element in self.elements:
-            element.blit(self, (element.pos_x, element.pos_y))
+            self.blit(element, (element.pos_x, element.pos_y))
+
+    def fill_elements(self):
+        for index, element in enumerate(self.elements):
+            if hasattr(self.elements[index], "elements"):
+                element.fill_elements()
+            element.fill(element.color, element.rect)
 
     def setup(self):
         # run this after initializing the object or anytime a change is made in element positions
@@ -36,5 +42,5 @@ class ElementGroup(Element):
         return adj_mouse_pos_x, adj_mouse_pos_y
 
     def click(self, mouse_pos=(0, 0)):
-        for element in self.element_ls:
+        for element in self.elements:
             element.click(element.get_mouse_pos((self.get_mouse_pos(mouse_pos))))
