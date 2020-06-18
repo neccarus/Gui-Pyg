@@ -1,7 +1,7 @@
 import pygame, sys
-from gui import GUI
+from gui_pyg.guipyg.gui import GUI
 from . import create_gui
-import gui_element
+import .gui_element
 pygame.init()
 
 
