@@ -23,6 +23,14 @@ class GUI(pygame.Surface):
         self.pos_y = pos_y
         self.elements = elements
 
+    def blit_elements(self):
+        for element in self.elements:
+            element.blit(self, (element.pos_x, element.pos_y))
+
+    def fill_elements(self):
+        for element in self.elements:
+            element.fill(element.color, element.rect)
+
 
 class GUIEncoder(JSONEncoder):
 

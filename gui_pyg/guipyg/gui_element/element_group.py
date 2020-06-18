@@ -20,7 +20,7 @@ class ElementGroup(Element):
         self.class_name = self.my_name()
 
     def blit_elements(self):
-        for element in self.element_ls:
+        for element in self.elements:
             element.blit(self, (element.pos_x, element.pos_y))
 
     def setup(self):
