@@ -7,7 +7,7 @@ class ElementGroup(Element):
     # ElementGroup can be a group of any Element(s) or ElementGroup(s)
 
     def __init__(self, width=0, height=0, pos_x=0, pos_y=0, name="Element Group", color=(255, 255, 255), style="default",
-                 elements=[], **_):
+                 is_visible=True, elements=[], **_):
         self.width = width
         self.height = height
         self.name = name
@@ -15,7 +15,7 @@ class ElementGroup(Element):
         self.style = style
         self.pos_x = pos_x
         self.pos_y = pos_y
-        super().__init__(width, height, pos_x, pos_y, name, color, style)
+        super().__init__(width, height, pos_x, pos_y, name, color, style, is_visible)
         self.elements = elements
         self.class_name = self.my_name()
 
@@ -28,6 +28,12 @@ class ElementGroup(Element):
             if hasattr(self.elements[index], "elements"):
                 element.fill_elements()
             element.fill(element.color, element.rect)
+
+    def draw_text_to_elements(self):
+        for index, element in enumerate(self.elements):
+            if hasattr(self.elements[index], "elements"):
+                element.draw_text_to_elements(element)
+            element.draw_text(element)
 
     def setup(self):
         # run this after initializing the object or anytime a change is made in element positions

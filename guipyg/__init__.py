@@ -20,7 +20,7 @@ def create_gui(surface=pygame.Surface((0, 0)), length=0, height=0, pos_x=0, pos_
     # button3 = Button(30, 30, 40, 40, name="Button 3")
     # menu = Menu(elements=[button, button2, button3])
     #button_enc = encode_element(button)
-    gui = GUI(surface, length, height, pos_x, pos_y, elements=elements)
+    gui = GUI(length, height, pos_x, pos_y, elements=elements)
 
     #gui.get_elements(json.loads(os.path.join(config, "buttons.json")))
     #load_elements("buttons", json.loads(config.buttons))

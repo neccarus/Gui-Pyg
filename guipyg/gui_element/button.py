@@ -4,9 +4,10 @@ from .toggleable_element import ToggleableElement
 # A single GUI element with a function attached
 class Button(ToggleableElement):
 
-    def __init__(self, width=0, height=0, pos_x=0, pos_y=0, function=None, name="Button", color=(255, 255, 255), style="default", **_):
+    def __init__(self, width=0, height=0, pos_x=0, pos_y=0, function=None, name="Button", color=(255, 255, 255),
+                 style="default", is_visible=True, **_):
         self.function = function
-        super().__init__(width, height, pos_x, pos_y, name=name, color=color, style=style)
+        super().__init__(width, height, pos_x, pos_y, name=name, color=color, style=style, is_visible=is_visible)
 
     def toggle_click(self):
         self.toggle = not self.toggle

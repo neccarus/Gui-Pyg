@@ -14,20 +14,21 @@ class_types = {"Element": Element, "Button": Button, "Popup": Popup, "Toggleable
 
 class GUI(pygame.Surface):
 
-    def __init__(self, surface=pygame.Surface, length=0, height=0, pos_x=0, pos_y=0, elements=[], *_):
+    def __init__(self, length=0, height=0, pos_x=0, pos_y=0, elements=[], *_):
         self.length = length
         self.height = height
         super().__init__((self.length, self.height))
-        self.surface = surface  # passed in as a string as json doesn't want to encode pygame.Surface objects
+        #self.surface = surface  # passed in as a string as json doesn't want to encode pygame.Surface objects
         self.pos_x = pos_x
         self.pos_y = pos_y
         self.elements = elements
 
     def blit_elements(self):
         for index, element in enumerate(self.elements):
-            if hasattr(self.elements[index], "elements"):
-                element.blit_elements()
-            self.blit(element, (element.pos_x, element.pos_y))
+            if element.is_visible:
+                if hasattr(self.elements[index], "elements"):
+                    element.blit_elements()
+                self.blit(element, (element.pos_x, element.pos_y))
 
     def fill_elements(self):
         for index, element in enumerate(self.elements):
@@ -36,15 +37,35 @@ class GUI(pygame.Surface):
             element.fill(element.color, element.rect)
             # element.blit(element, (0, 0))
 
+    def draw_text_to_elements(self):
+        for index, element in enumerate(self.elements):
+            if hasattr(self.elements[index], "elements"):
+                element.draw_text_to_elements()
+            element.draw_text(element)
+
+    def update(self, screen):
+        self.fill_elements()
+        self.fill((0, 0, 0))
+        self.set_colorkey((0, 0, 0))
+        self.draw_text_to_elements()
+        self.blit_elements()
+        screen.blit(self, (0, 0))
+
 
 class GUIEncoder(JSONEncoder):
 
     def default(self, o):
-        return o.__dict__
+        #self.skipkeys = True
+        if hasattr(o, "__dict__"):
+            return o.__dict__
+        else:
+            pass
+        # Let the base class default method raise the TypeError
+        # return JSONEncoder.default(self, o)
 
 
 def encode_gui(gui):
-    return json.dumps(gui, cls=GUIEncoder, indent=4)
+    return json.dumps(gui, skipkeys=True, cls=GUIEncoder, indent=4)
 
 
 def decode_element(element, cls=Element, class_types={}):
