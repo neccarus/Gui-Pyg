@@ -1,6 +1,7 @@
 import pygame
 import json
 from json import JSONEncoder
+from guipyg import gui
 #from pygame.locals import *
 
 
@@ -35,6 +36,7 @@ class Element(pygame.Surface):
 
     def toggle_visibility(self, *_, **__):
         self.is_visible = not self.is_visible
+        print(self.name)
         print("Toggle visibility: " + str(self.is_visible))
 
     def draw_text(self, surface):

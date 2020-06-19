@@ -10,6 +10,7 @@ from .gui_element.menu import Menu
 
 class_types = {"Element": Element, "Button": Button, "Popup": Popup, "ToggleableElement": ToggleableElement,
                "ElementGroup": ElementGroup, "Menu": Menu}
+functions = {}
 
 
 class GUI(pygame.Surface):
@@ -22,6 +23,8 @@ class GUI(pygame.Surface):
         self.pos_x = pos_x
         self.pos_y = pos_y
         self.elements = elements
+
+    #def toggle_element_visibility(self, element_name):
 
     def blit_elements(self):
         for index, element in enumerate(self.elements):
@@ -44,9 +47,10 @@ class GUI(pygame.Surface):
             element.draw_text(element)
 
     def update(self, screen):
-        self.fill_elements()
+        # screen to blit to
         self.fill((0, 0, 0))
         self.set_colorkey((0, 0, 0))
+        self.fill_elements()
         self.draw_text_to_elements()
         self.blit_elements()
         screen.blit(self, (0, 0))
@@ -55,6 +59,9 @@ class GUI(pygame.Surface):
 class GUIEncoder(JSONEncoder):
 
     def default(self, o):
+        if hasattr(o, "function"):
+            o.function = o.function.__name__
+            print(o.function)
         #self.skipkeys = True
         if hasattr(o, "__dict__"):
             return o.__dict__
@@ -75,6 +82,8 @@ def decode_element(element, cls=Element, class_types={}):
         element_obj = cls(**element_decode)
     else:
         element_obj = cls(**element)
+        if hasattr(element_obj, "function"):
+            element_obj.function = functions[element_obj.function]
         if hasattr(element_obj, "elements"):
             for index, element in enumerate(element_obj.elements):
                 element_name = element["class_name"]
@@ -82,6 +91,24 @@ def decode_element(element, cls=Element, class_types={}):
                 element_obj.elements[index] = obj
 
     return element_obj
+
+
+def match_element_name(gui, name):
+    if hasattr(gui, "elements"):
+        for index, element in enumerate(gui.elements):
+            if hasattr(element, "elements"):
+                match_element_name(element.elements, name)
+            if element.name == name:
+                return element
+
+
+def update_element_functions(gui, functions):
+    if hasattr(gui, "elements"):
+        for index, element in enumerate(gui.elements):
+            if hasattr(element, "elements"):
+                update_element_functions(element, functions)
+            if hasattr(element, "function"):
+                element.function = functions[element.function.__name__]
 
 
 def decode_gui(gui):
