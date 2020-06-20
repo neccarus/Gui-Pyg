@@ -8,12 +8,12 @@ class Button(ToggleableElement):
                  style="default", is_visible=True, **_):
         self.function = function
         super().__init__(width, height, pos_x, pos_y, name=name, color=color, style=style, is_visible=is_visible)
+        self.font_pos_x, self.font_pos_y = self.rect.center
 
     def toggle_click(self):
         self.toggle = not self.toggle
 
     def get_click(self, mouse_pos=(0, 0)):
-        #mouse_pos_x, mouse_pos_y = mouse_pos[0], mouse_pos[1]
         mouse_pos_x, mouse_pos_y = self.get_mouse_pos(mouse_pos)
         if self.pos_x <= mouse_pos_x <= (self.pos_x + self.width) and \
                 self.pos_y <= mouse_pos_y <= (self.pos_y + self.height):
@@ -24,3 +24,9 @@ class Button(ToggleableElement):
         if self.toggle:
             self.toggle_click()
             return self.function(mouse_pos, *args, **kwargs)
+
+    def draw_text(self, surface):
+        text_obj = self.font.render(self.name, 1, self.font_color)
+        text_rect = text_obj.get_rect()
+        text_rect.center = (self.font_pos_x, self.font_pos_y)
+        surface.blit(text_obj, text_rect)

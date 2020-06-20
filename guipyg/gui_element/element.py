@@ -2,7 +2,6 @@ import pygame
 import json
 from json import JSONEncoder
 from guipyg import gui
-#from pygame.locals import *
 
 
 class Element(pygame.Surface):
@@ -15,7 +14,7 @@ class Element(pygame.Surface):
         return self.__class__.__name__
 
     def __init__(self, width=0, height=0, pos_x=0, pos_y=0, name="Element", color=(255, 255, 255), style="default",
-                 is_visible=True, **_):
+                 is_visible=True, font_color=(10, 10, 10), **_):
         super().__init__((width, height))
         self.width = width
         self.height = height
@@ -28,7 +27,11 @@ class Element(pygame.Surface):
         self.rect = pygame.Rect((0, 0), (self.width, self.height))
         self.class_name = self.my_name()
         self.font = pygame.font.SysFont("arial black", 18)
-        self.font_color = (10, 10, 10)
+        self.font_color = font_color
+        self.font_pos_x = 10
+        self.font_pos_y = 0
+        self.has_border = True
+        self.border_thickness = 3
 
     def get_mouse_pos(self, mouse_pos=(0, 0)):
         # for compatibility with ElementGroup
@@ -42,7 +45,7 @@ class Element(pygame.Surface):
     def draw_text(self, surface):
         text_obj = self.font.render(self.name, 1, self.font_color)
         text_rect = text_obj.get_rect()
-        text_rect.topleft = (10, 0)
+        text_rect.topleft = (self.font_pos_x, self.font_pos_y)
         surface.blit(text_obj, text_rect)
 
 

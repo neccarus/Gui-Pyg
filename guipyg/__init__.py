@@ -1,7 +1,4 @@
-import pygame
-import json
 import os
-# from pygame.locals import *
 
 
 def create_gui(length=0, height=0, pos_x=0, pos_y=0, elements=[], config=os.path.join(os.getcwd(), "config")):

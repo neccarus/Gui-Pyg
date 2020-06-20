@@ -1,5 +1,4 @@
 from .element import Element
-import json
 import pygame
 
 
@@ -7,7 +6,7 @@ class ElementGroup(Element):
     # ElementGroup can be a group of any Element(s) or ElementGroup(s)
 
     def __init__(self, width=0, height=0, pos_x=0, pos_y=0, name="Element Group", color=(255, 255, 255), style="default",
-                 is_visible=True, elements=[], **_):
+                 is_visible=True, elements=[], font_color=(10, 10, 10), **_):
         self.width = width
         self.height = height
         self.name = name
@@ -15,7 +14,7 @@ class ElementGroup(Element):
         self.style = style
         self.pos_x = pos_x
         self.pos_y = pos_y
-        super().__init__(width, height, pos_x, pos_y, name, color, style, is_visible)
+        super().__init__(width, height, pos_x, pos_y, name, color, style, is_visible, font_color)
         self.elements = elements
         self.class_name = self.my_name()
 
@@ -28,6 +27,13 @@ class ElementGroup(Element):
             if hasattr(self.elements[index], "elements"):
                 element.fill_elements()
             element.fill(element.color, element.rect)
+
+    def draw_element_border(self):
+        for index, element in enumerate(self.elements):
+            if element.has_border:
+                if hasattr(self.elements[index], "elements"):
+                    element.draw_element_border()
+                pygame.draw.rect(element, (1, 1, 1), (0, 0, element.width, element.height), element.border_thickness)
 
     def draw_text_to_elements(self):
         for index, element in enumerate(self.elements):

@@ -19,12 +19,9 @@ class GUI(pygame.Surface):
         self.length = length
         self.height = height
         super().__init__((self.length, self.height))
-        #self.surface = surface  # passed in as a string as json doesn't want to encode pygame.Surface objects
         self.pos_x = pos_x
         self.pos_y = pos_y
         self.elements = elements
-
-    #def toggle_element_visibility(self, element_name):
 
     def blit_elements(self):
         for index, element in enumerate(self.elements):
@@ -38,7 +35,13 @@ class GUI(pygame.Surface):
             if hasattr(self.elements[index], "elements"):
                 element.fill_elements()
             element.fill(element.color, element.rect)
-            # element.blit(element, (0, 0))
+
+    def draw_element_border(self):
+        for index, element in enumerate(self.elements):
+            if element.has_border:
+                if hasattr(self.elements[index], "elements"):
+                    element.draw_element_border()
+                pygame.draw.rect(element, (1, 1, 1), (0, 0, element.width, element.height), element.border_thickness)
 
     def draw_text_to_elements(self):
         for index, element in enumerate(self.elements):
@@ -52,6 +55,7 @@ class GUI(pygame.Surface):
         self.set_colorkey((0, 0, 0))
         self.fill_elements()
         self.draw_text_to_elements()
+        self.draw_element_border()
         self.blit_elements()
         screen.blit(self, (0, 0))
 
@@ -62,13 +66,10 @@ class GUIEncoder(JSONEncoder):
         if hasattr(o, "function"):
             o.function = o.function.__name__
             print(o.function)
-        #self.skipkeys = True
         if hasattr(o, "__dict__"):
             return o.__dict__
         else:
             pass
-        # Let the base class default method raise the TypeError
-        # return JSONEncoder.default(self, o)
 
 
 def encode_gui(gui):
@@ -119,5 +120,5 @@ def decode_gui(gui):
         element_name = element["class_name"]
         obj = decode_element(element, class_types[element_name], class_types)
         gui_obj.elements[index] = obj
-    #print(gui_obj)
+
     return gui_obj
