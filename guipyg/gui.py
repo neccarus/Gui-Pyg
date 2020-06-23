@@ -15,57 +15,87 @@ functions = {}
 
 class GUI(pygame.Surface):
 
-    def __init__(self, length=0, height=0, pos_x=0, pos_y=0, elements=[], *_):
-        self.length = length
+    def __init__(self, width=0, height=0, pos_x=0, pos_y=0, elements=None, *_, **__):
+        if elements is None:
+            elements = []
+        self.width = width
         self.height = height
-        super().__init__((self.length, self.height))
+        super().__init__((self.width, self.height))
         self.pos_x = pos_x
         self.pos_y = pos_y
+        self.set_colorkey((0, 0, 0))
         self.elements = elements
+        self.elements_to_update = self.elements
+        self.need_update = True
+        # self.set_clip_area()
 
     def blit_elements(self):
         for index, element in enumerate(self.elements):
             if element.is_visible:
+                element.blit(element.content_surface, element.content_rect.topleft)
                 if hasattr(self.elements[index], "elements"):
                     element.blit_elements()
                 self.blit(element, (element.pos_x, element.pos_y))
 
     def fill_elements(self):
-        for index, element in enumerate(self.elements):
-            if hasattr(self.elements[index], "elements"):
+        for index, element in enumerate(self.elements_to_update):
+            if hasattr(self.elements_to_update[index], "elements"):
                 element.fill_elements()
             element.fill(element.color, element.rect)
+            element.content_surface.fill(element.color)
+        self.elements_to_update = []
 
     def draw_element_border(self):
         for index, element in enumerate(self.elements):
             if element.has_border:
                 if hasattr(self.elements[index], "elements"):
                     element.draw_element_border()
-                pygame.draw.rect(element, (1, 1, 1), (0, 0, element.width, element.height), element.border_thickness)
+                pygame.draw.rect(element, (1, 1, 1), (0, 0, element.width - abs((element.border_thickness % 2) - 1),
+                                                      element.height - abs((element.border_thickness % 2) - 1)),
+                                 element.border_thickness)
 
     def draw_text_to_elements(self):
         for index, element in enumerate(self.elements):
             if hasattr(self.elements[index], "elements"):
                 element.draw_text_to_elements()
-            element.draw_text(element)
+
+            element.draw_text(element.content_surface)
+
+    def set_clip_area(self):
+        left, top, right, bottom = self.width, self.height, 0, 0
+        for element in self.elements:
+            if element.rect.left < left:
+                left = element.rect.left
+            if element.rect.top < top:
+                top = element.rect.top
+            if element.rect.right > right:
+                right = element.rect.right
+            if element.rect.bottom > bottom:
+                bottom = element.rect.bottom
 
     def update(self, screen):
         # screen to blit to
-        self.fill((0, 0, 0))
+        if self.need_update:
+            self.fill((0, 0, 0))
+            self.set_clip_area()
         self.set_colorkey((0, 0, 0))
         self.fill_elements()
         self.draw_text_to_elements()
         self.draw_element_border()
         self.blit_elements()
         screen.blit(self, (0, 0))
+        self.need_update = False
 
 
 class GUIEncoder(JSONEncoder):
 
     def default(self, o):
         if hasattr(o, "function"):
-            o.function = o.function.__name__
+            # if type(o.function) is str:
             print(o.function)
+            o.function = o.function.__name__
+        if hasattr(o, "elements_to_update"):
+            o.elements_to_update = None
         if hasattr(o, "__dict__"):
             return o.__dict__
         else:
@@ -73,11 +103,10 @@ class GUIEncoder(JSONEncoder):
 
 
 def encode_gui(gui):
-    return json.dumps(gui, skipkeys=True, cls=GUIEncoder, indent=4)
+    return json.dumps(gui, skipkeys=True, cls=GUIEncoder, indent=1)
 
 
-def decode_element(element, cls=Element, class_types={}):
-
+def decode_element(element, cls=Element, class_types=None):
     if type(element) != dict:
         element_decode = json.loads(element)
         element_obj = cls(**element_decode)
@@ -103,11 +132,11 @@ def match_element_name(gui, name):
                 return element
 
 
-def update_element_functions(gui, functions):
+def update_element_functions(gui):
     if hasattr(gui, "elements"):
         for index, element in enumerate(gui.elements):
             if hasattr(element, "elements"):
-                update_element_functions(element, functions)
+                update_element_functions(element)
             if hasattr(element, "function"):
                 element.function = functions[element.function.__name__]
 
