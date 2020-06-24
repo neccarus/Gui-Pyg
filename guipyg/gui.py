@@ -91,8 +91,6 @@ class GUIEncoder(JSONEncoder):
 
     def default(self, o):
         if hasattr(o, "function"):
-            # if type(o.function) is str:
-            print(o.function)
             o.function = o.function.__name__
         if hasattr(o, "elements_to_update"):
             o.elements_to_update = None

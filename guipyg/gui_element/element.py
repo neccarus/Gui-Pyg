@@ -1,8 +1,8 @@
 import pygame
 import json
 from json import JSONEncoder
-from guipyg import gui
 from datetime import datetime
+from guipyg.gui_style import style_item
 
 
 class Element(pygame.Surface):
@@ -50,8 +50,10 @@ class Element(pygame.Surface):
         self.has_border = True
         self.is_draggable = False
         self.drag_toggle = False
-        self.drag_timer_start = 0
-        self.drag_timer_delta = 0
+        for style in style_item.style_dict:
+            print(style)
+            if self.style == style_item.style_dict[style].style_name:
+                style_item.style_dict[style].style_element(self)
 
     def get_mouse_pos(self, mouse_pos=(0, 0)):
         # for compatibility with ElementGroup
@@ -67,24 +69,26 @@ class Element(pygame.Surface):
         surface.blit(self.text_obj, self.text_rect)
 
     def drag_element(self, mouse_pos=(0, 0), timer=0):
-        # self.drag_toggle = True
         mouse_pos_start = mouse_pos
         mouse_pos_delta = (0, 0)
         element_pos_x = self.pos_x
         element_pos_y = self.pos_y
         element_pos_delta_x = 0
         element_pos_delta_y = 0
+        drag_timer_start = 0
+        drag_timer_delta = 0
         while self.drag_toggle:
-            if self.drag_timer_start == 0:
-                self.drag_timer_start = timer
-                # print(self.drag_timer_start)
-                self.drag_timer_delta = datetime.now() - self.drag_timer_start
+            current_mouse_pos = pygame.mouse.get_pos()
+            if drag_timer_start == 0:
+                drag_timer_start = timer
+                drag_timer_delta = datetime.now() - drag_timer_start
             else:
-                mouse_pos_delta = (pygame.mouse.get_pos()[0] - mouse_pos_start[0], pygame.mouse.get_pos()[1] - mouse_pos_start[1])
-                self.drag_timer_delta = datetime.now() - self.drag_timer_start
-                element_pos_delta_x, element_pos_delta_y = (element_pos_x + mouse_pos_delta[0], element_pos_y + mouse_pos_delta[1])
+                mouse_pos_delta = (current_mouse_pos[0] - mouse_pos_start[0], current_mouse_pos[1] - mouse_pos_start[1])
+                drag_timer_delta = datetime.now() - drag_timer_start
+                element_pos_delta_x, element_pos_delta_y = (element_pos_x + mouse_pos_delta[0],
+                                                            element_pos_y + mouse_pos_delta[1])
 
-            if self.drag_toggle and self.drag_timer_delta.total_seconds() * 1000 >= 150:
+            if self.drag_toggle and drag_timer_delta.total_seconds() * 1000 >= 200:
                 yield element_pos_delta_x, element_pos_delta_y
             yield self.pos_x, self.pos_y
 
