@@ -15,7 +15,7 @@ functions = {}
 
 class GUI(pygame.Surface):
 
-    def __init__(self, width=0, height=0, pos_x=0, pos_y=0, elements=None, *_, **__):
+    def __init__(self, width=0, height=0, pos_x=0, pos_y=0, elements=None, theme="default", *_, **__):
         if elements is None:
             elements = []
         self.width = width
@@ -26,6 +26,7 @@ class GUI(pygame.Surface):
         self.set_colorkey((0, 0, 0))
         self.elements = elements
         self.elements_to_update = self.elements
+        self.theme = theme # receives a Theme object from style module, used to stylize all elements
         self.need_update = True
         # self.set_clip_area()
 

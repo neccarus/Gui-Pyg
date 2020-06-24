@@ -96,4 +96,4 @@ while True:
     screen.fill((80, 80, 80))
     clock.tick()
 
-    #clock.tick(60)
+    # clock.tick(60)

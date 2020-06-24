@@ -59,3 +59,7 @@ class FontStyle(Style):
         element.font_bold = self.font_bold
         element.font_underline = self.font_underline
         element.text_wrapping = self.text_wrapping
+
+class Theme():
+    # Pass Theme object to GUI to stylize all elements within the GUI
+    pass

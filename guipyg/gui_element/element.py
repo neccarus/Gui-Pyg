@@ -51,7 +51,6 @@ class Element(pygame.Surface):
         self.is_draggable = False
         self.drag_toggle = False
         for style in style_item.style_dict:
-            print(style)
             if self.style == style_item.style_dict[style].style_name:
                 style_item.style_dict[style].style_element(self)
 
@@ -61,8 +60,8 @@ class Element(pygame.Surface):
 
     def toggle_visibility(self, *_, **__):
         self.is_visible = not self.is_visible
-        print(self.name)
-        print("Toggle visibility: " + str(self.is_visible))
+        # print(self.name)
+        # print("Toggle visibility: " + str(self.is_visible))
 
     def draw_text(self, surface):
 
