@@ -33,9 +33,9 @@ button_three = Button(150, 50, 10, 30, my_menu.toggle_visibility, "Button 3", (1
 my_menu_two = Menu(250, 200, 500, 50, "Menu Two", color=(50, 50, 50), elements=[button_three])
 my_menu.font_color = (250, 250, 250)
 my_menu_two.font_color = (250, 250, 250)
-screen = pygame.display.set_mode((800, 600), 0, 32)
+screen = pygame.display.set_mode((1280, 720), 0, 32)
 pygame.display.toggle_fullscreen()
-my_gui = create_gui(800, 600, 0, 0)
+my_gui = create_gui(1280, 720, 0, 0)
 my_gui.elements.append(my_menu)
 my_gui.elements.append(my_menu_two)
 gui.functions["toggle_visibility"] = gui.match_element_name(my_gui, "Menu One").toggle_visibility
@@ -64,10 +64,13 @@ while True:
         if event.type == pygame.QUIT:
             sys.exit()
         if event.type == pygame.MOUSEBUTTONDOWN:
-            for index, element in enumerate(my_gui.elements):
-                if element.is_visible and element.is_draggable:
-                    element.drag_toggle = True
-                    drag = element.drag_element(pygame.mouse.get_pos(), datetime.now())
+            reversed_elements = my_gui.elements[::-1]
+            for element in reversed_elements:
+                if element.rect.collidepoint(element.get_mouse_pos(pygame.mouse.get_pos())):
+                    if element.is_visible and element.is_draggable:
+                        element.drag_toggle = True
+                        drag = element.drag_element(pygame.mouse.get_pos(), datetime.now())
+                        break
         if event.type == pygame.MOUSEBUTTONUP:
             for index, element in enumerate(my_gui.elements):
                 if element.is_visible:
@@ -79,6 +82,7 @@ while True:
     for index, element in enumerate(my_gui.elements):
         if element.is_visible and element.drag_toggle:
             element.pos_x, element.pos_y = next(drag)
+            my_gui.need_update = True
             # print(element.pos_x, element.pos_y)
 
     my_gui.update(screen)
