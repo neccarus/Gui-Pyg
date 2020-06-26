@@ -7,6 +7,7 @@ from .gui_element.toggleable_element import ToggleableElement
 from .gui_element.popup import Popup
 from .gui_element.element_group import ElementGroup
 from .gui_element.menu import Menu
+from .gui_style.style_item import theme_dict
 
 class_types = {"Element": Element, "Button": Button, "Popup": Popup, "ToggleableElement": ToggleableElement,
                "ElementGroup": ElementGroup, "Menu": Menu}
@@ -26,17 +27,23 @@ class GUI(pygame.Surface):
         self.set_colorkey((0, 0, 0))
         self.elements = elements
         self.elements_to_update = self.elements
-        self.theme = theme # receives a Theme object from style module, used to stylize all elements
+        self.theme = theme  # receives a Theme object from style module, used to stylize all elements
         self.need_update = True
         # self.set_clip_area()
 
-    def blit_elements(self):
-        for index, element in enumerate(self.elements):
-            if element.is_visible:
-                element.blit(element.content_surface, element.content_rect.topleft)
-                if hasattr(self.elements[index], "elements"):
-                    element.blit_elements()
-                self.blit(element, (element.pos_x, element.pos_y))
+    def apply_theme(self):
+        for theme in theme_dict:
+            print(theme)
+            if self.theme == theme_dict[theme].theme_name:
+                print("found theme")
+                theme_dict[theme].style_gui(self)
+
+    def blit_elements(self, element, index):
+        if element.is_visible:
+            element.blit(element.content_surface, element.content_rect.topleft)
+            if hasattr(self.elements[index], "elements"):
+                element.blit_elements()
+            self.blit(element, (element.pos_x, element.pos_y))
 
     def fill_elements(self):
         for index, element in enumerate(self.elements_to_update):
@@ -46,21 +53,19 @@ class GUI(pygame.Surface):
             element.content_surface.fill(element.color)
         self.elements_to_update = []
 
-    def draw_element_border(self):
-        for index, element in enumerate(self.elements):
-            if element.has_border:
-                if hasattr(self.elements[index], "elements"):
-                    element.draw_element_border()
-                pygame.draw.rect(element, (1, 1, 1), (0, 0, element.width - abs((element.border_thickness % 2) - 1),
-                                                      element.height - abs((element.border_thickness % 2) - 1)),
-                                 element.border_thickness)
-
-    def draw_text_to_elements(self):
-        for index, element in enumerate(self.elements):
+    def draw_element_border(self, element, index):
+        if element.has_border:
             if hasattr(self.elements[index], "elements"):
-                element.draw_text_to_elements()
+                element.draw_element_border()
+            pygame.draw.rect(element, (1, 1, 1), (0, 0, element.width - abs((element.border_thickness % 2) - 1),
+                                                  element.height - abs((element.border_thickness % 2) - 1)),
+                             element.border_thickness)
 
-            element.draw_text(element.content_surface)
+    def draw_text_to_elements(self, element, index):
+        if hasattr(self.elements[index], "elements"):
+            element.draw_text_to_elements()
+
+        element.draw_text(element.content_surface)
 
     def set_clip_area(self):
         left, top, right, bottom = self.width, self.height, 0, 0
@@ -81,9 +86,10 @@ class GUI(pygame.Surface):
             self.set_clip_area()
         self.set_colorkey((0, 0, 0))
         self.fill_elements()
-        self.draw_text_to_elements()
-        self.draw_element_border()
-        self.blit_elements()
+        for index, element in enumerate(self.elements):
+            self.draw_text_to_elements(element, index)
+            self.draw_element_border(element, index)
+            self.blit_elements(element, index)
         screen.blit(self, (0, 0))
         self.need_update = False
 

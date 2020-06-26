@@ -60,6 +60,21 @@ class FontStyle(Style):
         element.font_underline = self.font_underline
         element.text_wrapping = self.text_wrapping
 
-class Theme():
+
+class Theme:
     # Pass Theme object to GUI to stylize all elements within the GUI
-    pass
+
+    def __init__(self, theme_name, element_group_style, element_style, element_group_font=None, element_font=None):
+        self.theme_name = theme_name
+        self.element_group_style = element_group_style
+        self.element_style = element_style
+        self.element_group_font = element_group_font
+        self.element_font = element_font
+
+    def style_gui(self, gui):
+        for index, element in enumerate(gui.elements):
+            if element.class_name == "Menu" or element.class_name == "ElementGroup" or element.class_name == "PopUp":
+                self.element_group_style.style_element(element)
+            if hasattr(gui.elements[index], "elements"):
+                for inner_element in element.elements:
+                    self.element_style.style_element(inner_element)

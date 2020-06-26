@@ -1,0 +1,10 @@
+
+venv/
+
+venv38/
+
+guipyg/__pycache__/
+
+guipyg/gui_element/__pycache__/
+
+guipyg/gui_style/__pycache__/
