@@ -2,7 +2,7 @@ import pygame
 import json
 from json import JSONEncoder
 from datetime import datetime
-from guipyg.gui_style import style_item
+from guipyg.gui_style.style_item import style_dict
 
 
 class Element(pygame.Surface):
@@ -13,6 +13,11 @@ class Element(pygame.Surface):
 
     def class_name(self):
         return self.__class__.__name__
+
+    def set_style(self):
+        for style in style_dict:
+            if self.style == style_dict[style].style_name:
+                style_dict[style].style_element(self)
 
     def __init__(self, width=0, height=0, pos_x=0, pos_y=0, name="Element", color=(255, 255, 255), style="default",
                  is_visible=True, font_color=(10, 10, 10), rect=None, **_):
@@ -27,7 +32,7 @@ class Element(pygame.Surface):
         self.is_visible = is_visible
         self.border_thickness = 1
         self.border_color = (1, 1, 1)
-        self.corner_rounding = 0
+        self.corner_rounding = None
         self.margin_top = 0
         self.margin_bottom = 0
         self.margin_left = 0
@@ -50,9 +55,7 @@ class Element(pygame.Surface):
         self.has_border = True
         self.is_draggable = False
         self.drag_toggle = False
-        for style in style_item.style_dict:
-            if self.style == style_item.style_dict[style].style_name:
-                style_item.style_dict[style].style_element(self)
+        self.set_style()
 
     def get_mouse_pos(self, mouse_pos=(0, 0)):
         # for compatibility with ElementGroup
@@ -60,8 +63,6 @@ class Element(pygame.Surface):
 
     def toggle_visibility(self, *_, **__):
         self.is_visible = not self.is_visible
-        # print(self.name)
-        # print("Toggle visibility: " + str(self.is_visible))
 
     def draw_text(self, surface):
 

@@ -30,8 +30,13 @@ class ElementGroup(Element):
         for index, element in enumerate(self.elements):
             if hasattr(self.elements[index], "elements"):
                 element.fill_elements()
-            element.fill(element.color, element.rect)
-            element.content_surface.fill(element.color)
+            if not element.corner_rounding:
+                element.fill(element.color, element.rect)
+                element.content_surface.fill(element.color)
+
+            elif element.corner_rounding:
+                pygame.draw.rect(element, element.color, element.get_rect(), border_radius=element.corner_rounding)
+                pygame.draw.rect(element.content_surface, element.color, element.content_rect, border_radius=element.corner_rounding)
 
     def draw_element_border(self):
         for index, element in enumerate(self.elements):
@@ -41,7 +46,7 @@ class ElementGroup(Element):
                 pygame.draw.rect(element, (1, 1, 1),
                                  (0, 0, element.width - abs((element.border_thickness % 2) - 1),
                                   element.height - abs((element.border_thickness % 2) - 1)),
-                                 element.border_thickness)
+                                 element.border_thickness, border_radius=element.corner_rounding)
 
     def draw_text_to_elements(self):
         for index, element in enumerate(self.elements):

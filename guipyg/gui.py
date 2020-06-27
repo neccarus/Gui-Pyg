@@ -16,7 +16,7 @@ functions = {}
 
 class GUI(pygame.Surface):
 
-    def __init__(self, width=0, height=0, pos_x=0, pos_y=0, elements=None, theme="default", *_, **__):
+    def __init__(self, width=0, height=0, pos_x=0, pos_y=0, elements=None, theme=None, *_, **__):
         if elements is None:
             elements = []
         self.width = width
@@ -29,14 +29,16 @@ class GUI(pygame.Surface):
         self.elements_to_update = self.elements
         self.theme = theme  # receives a Theme object from style module, used to stylize all elements
         self.need_update = True
+        # self.clip_rect = None
         # self.set_clip_area()
 
     def apply_theme(self):
-        for theme in theme_dict:
-            print(theme)
-            if self.theme == theme_dict[theme].theme_name:
-                print("found theme")
-                theme_dict[theme].style_gui(self)
+        if self.theme:
+            for theme in theme_dict:
+                print(theme)
+                if self.theme == theme_dict[theme].theme_name:
+                    print("found theme")
+                    theme_dict[theme].style_gui(self)
 
     def blit_elements(self, element, index):
         if element.is_visible:
@@ -46,11 +48,19 @@ class GUI(pygame.Surface):
             self.blit(element, (element.pos_x, element.pos_y))
 
     def fill_elements(self):
+
         for index, element in enumerate(self.elements_to_update):
             if hasattr(self.elements_to_update[index], "elements"):
                 element.fill_elements()
-            element.fill(element.color, element.rect)
-            element.content_surface.fill(element.color)
+
+            if not element.corner_rounding:
+                element.fill(element.color, element.rect)
+                element.content_surface.fill(element.color)
+            elif element.corner_rounding:
+                pygame.draw.rect(element, element.color, element.get_rect(), border_radius=element.corner_rounding)
+                pygame.draw.rect(element.content_surface, element.color, element.content_rect,
+                                 border_radius=element.corner_rounding)
+
         self.elements_to_update = []
 
     def draw_element_border(self, element, index):
@@ -59,7 +69,7 @@ class GUI(pygame.Surface):
                 element.draw_element_border()
             pygame.draw.rect(element, (1, 1, 1), (0, 0, element.width - abs((element.border_thickness % 2) - 1),
                                                   element.height - abs((element.border_thickness % 2) - 1)),
-                             element.border_thickness)
+                             element.border_thickness, border_radius=element.corner_rounding)
 
     def draw_text_to_elements(self, element, index):
         if hasattr(self.elements[index], "elements"):
@@ -67,23 +77,26 @@ class GUI(pygame.Surface):
 
         element.draw_text(element.content_surface)
 
-    def set_clip_area(self):
-        left, top, right, bottom = self.width, self.height, 0, 0
-        for element in self.elements:
-            if element.rect.left < left:
-                left = element.rect.left
-            if element.rect.top < top:
-                top = element.rect.top
-            if element.rect.right > right:
-                right = element.rect.right
-            if element.rect.bottom > bottom:
-                bottom = element.rect.bottom
+    # def set_clip_area(self):
+    #     left, top, right, bottom = self.width, self.height, 0, 0
+    #     for element in self.elements:
+    #         if element.rect.left < left:
+    #             left = element.rect.left - 1
+    #         if element.rect.top < top:
+    #             top = element.rect.top - 1
+    #         if element.rect.right > right:
+    #             right = element.rect.right + 1
+    #         if element.rect.bottom > bottom:
+    #             bottom = element.rect.bottom + 1
+    #     self.clip_rect = pygame.Rect(left, top, right - left, bottom - top)
+    #     self.set_clip(self.clip_rect)
 
     def update(self, screen):
         # screen to blit to
+        # self.set_clip_area()
         if self.need_update:
             self.fill((0, 0, 0))
-            self.set_clip_area()
+            # self.set_clip_area()
         self.set_colorkey((0, 0, 0))
         self.fill_elements()
         for index, element in enumerate(self.elements):

@@ -27,6 +27,9 @@ def display_fps(fps, surface):
     text_rect.topleft = (font_pos_x, font_pos_y)
     surface.blit(text_obj, text_rect)
 
+
+gui_create_timer_start = datetime.now()
+
 button_one = Button(150, 50, 10, 50, function=clicker, name="Button One", color=(150, 150, 150))#, style="my_button_style")
 button_two = Button(150, 50, 10, 110, function=clicker, name="Button Two", color=(150, 150, 150))#, style="my_button_style")
 my_menu = Menu(400, 400, 50, 50, "Menu One", color=(50, 50, 50), elements=[button_one, button_two], is_visible=False)#, style="my_first_style")
@@ -37,8 +40,6 @@ my_menu_three = Menu(200, 150, 400, 200, "Menu Three", (50, 50, 50), elements=[b
 my_menu.font_color = (250, 250, 250)
 my_menu_two.font_color = (250, 250, 250)
 my_menu_three.font_color = (250, 250, 250)
-screen = pygame.display.set_mode((1280, 720), 0, 32)
-pygame.display.toggle_fullscreen()
 my_gui = create_gui(1280, 720, 0, 0, theme="my_theme")
 my_gui.elements.append(my_menu)
 my_gui.elements.append(my_menu_two)
@@ -46,16 +47,31 @@ my_gui.elements.append(my_menu_three)
 my_gui.apply_theme()
 gui.functions["toggle_visibility"] = gui.match_element_name(my_gui, "Menu One").toggle_visibility
 gui.functions["clicker"] = clicker
+
+gui_create_timer_end = datetime.now()
+
+print(f"It took {(gui_create_timer_end - gui_create_timer_start).total_seconds()} seconds to create the GUI.")
+
+screen = pygame.display.set_mode((1280, 720), 0, 32)
+# pygame.display.toggle_fullscreen()
 pygame.display.set_caption("Testing")
+
+gui_create_timer_start = datetime.now()
 
 gui_json = gui.encode_gui(my_gui)
 with open('gui_file.json', 'w') as w:
     json.dump(gui_json, w)
 
+gui_create_timer_end = datetime.now()
+
+print(f"It took {(gui_create_timer_end - gui_create_timer_start).total_seconds()} seconds to save the GUI to a file.")
+
 del my_gui
 
 gui.functions["clicker"] = clicker
 gui.functions["toggle_visibility"] = Element().toggle_visibility
+
+gui_create_timer_start = datetime.now()
 
 with open('gui_file.json', 'r') as r:
     gui_json = json.load(r)
@@ -63,6 +79,10 @@ my_gui = gui.decode_gui(gui_json)
 my_gui.apply_theme()
 gui.functions["toggle_visibility"] = gui.match_element_name(my_gui, "Menu One").toggle_visibility
 gui.update_element_functions(my_gui)
+
+gui_create_timer_end = datetime.now()
+
+print(f"It took {(gui_create_timer_end - gui_create_timer_start).total_seconds()} seconds to load the GUI from a file.")
 
 clock = pygame.time.Clock()
 drag = None
