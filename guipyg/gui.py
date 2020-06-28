@@ -14,14 +14,14 @@ class_types = {"Element": Element, "Button": Button, "Popup": Popup, "Toggleable
 functions = {}
 
 
-class GUI(pygame.Surface):
+class GUI(ElementGroup):
 
-    def __init__(self, width=0, height=0, pos_x=0, pos_y=0, elements=None, theme=None, *_, **__):
+    def __init__(self, width=0, height=0, pos_x=0, pos_y=0, name="GUI", elements=None, theme=None, *_, **__):
         if elements is None:
             elements = []
         self.width = width
         self.height = height
-        super().__init__((self.width, self.height))
+        super().__init__(width, height, pos_x, pos_y, name, elements=elements)
         self.pos_x = pos_x
         self.pos_y = pos_y
         self.set_colorkey((0, 0, 0))
@@ -40,12 +40,12 @@ class GUI(pygame.Surface):
                     print("found theme")
                     theme_dict[theme].style_gui(self)
 
-    def blit_elements(self, element, index):
-        if element.is_visible:
-            element.blit(element.content_surface, element.content_rect.topleft)
-            if hasattr(self.elements[index], "elements"):
-                element.blit_elements()
-            self.blit(element, (element.pos_x, element.pos_y))
+    # def blit_elements(self, element, index):
+    #     if element.is_visible:
+    #         element.blit(element.content_surface, element.content_rect.topleft)
+    #         if hasattr(self.elements[index], "elements"):
+    #             element.blit_elements()
+    #         self.blit(element, (element.pos_x, element.pos_y))
 
     def fill_elements(self):
 
@@ -63,19 +63,19 @@ class GUI(pygame.Surface):
 
         self.elements_to_update = []
 
-    def draw_element_border(self, element, index):
-        if element.has_border:
-            if hasattr(self.elements[index], "elements"):
-                element.draw_element_border()
-            pygame.draw.rect(element, (1, 1, 1), (0, 0, element.width - abs((element.border_thickness % 2) - 1),
-                                                  element.height - abs((element.border_thickness % 2) - 1)),
-                             element.border_thickness, border_radius=element.corner_rounding)
+    # def draw_element_border(self, element, index):
+    #     if element.has_border:
+    #         if hasattr(self.elements[index], "elements"):
+    #             element.draw_element_border()
+    #         pygame.draw.rect(element, (1, 1, 1), (0, 0, element.width - abs((element.border_thickness % 2) - 1),
+    #                                               element.height - abs((element.border_thickness % 2) - 1)),
+    #                          element.border_thickness, border_radius=element.corner_rounding)
 
-    def draw_text_to_elements(self, element, index):
-        if hasattr(self.elements[index], "elements"):
-            element.draw_text_to_elements()
-
-        element.draw_text(element.content_surface)
+    # def draw_text_to_elements(self, element, index):
+    #     if hasattr(self.elements[index], "elements"):
+    #         element.draw_text_to_elements()
+    #
+    #     element.draw_text(element.content_surface)
 
     # def set_clip_area(self):
     #     left, top, right, bottom = self.width, self.height, 0, 0
@@ -99,10 +99,11 @@ class GUI(pygame.Surface):
             # self.set_clip_area()
         self.set_colorkey((0, 0, 0))
         self.fill_elements()
-        for index, element in enumerate(self.elements):
-            self.draw_text_to_elements(element, index)
-            self.draw_element_border(element, index)
-            self.blit_elements(element, index)
+        for element in self.elements:
+            if element.is_visible:
+                element.draw_text_to_elements()
+                element.draw_element_border()
+                element.blit_elements(self)
         screen.blit(self, (0, 0))
         self.need_update = False
 
