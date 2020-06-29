@@ -22,6 +22,12 @@ class ElementGroup(Element):
         self.class_name = self.my_name()
         self.is_draggable = True
 
+    def fill_elements(self):
+        for element in self.elements:
+            # if hasattr(element, "elements"):
+            element.fill_elements()
+        super().fill_elements()
+
     def draw_element_border(self):
         for element in self.elements:
             if element.has_border:
@@ -41,7 +47,7 @@ class ElementGroup(Element):
 
     def setup(self):
         # run this after initializing the object or anytime a change is made in element positions
-        self.blit_elements()
+        self.blit_elements(self)
 
     def get_mouse_pos(self, mouse_pos=(0, 0)):
         # adjusts the position of the mouse within the ElementGroup

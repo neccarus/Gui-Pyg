@@ -8,6 +8,7 @@ from .gui_element.popup import Popup
 from .gui_element.element_group import ElementGroup
 from .gui_element.menu import Menu
 from .gui_style.style_item import theme_dict
+from datetime import datetime
 
 class_types = {"Element": Element, "Button": Button, "Popup": Popup, "ToggleableElement": ToggleableElement,
                "ElementGroup": ElementGroup, "Menu": Menu}
@@ -29,7 +30,10 @@ class GUI(ElementGroup):
         self.elements_to_update = self.elements
         self.theme = theme  # receives a Theme object from style module, used to stylize all elements
         self.need_update = True
-        # self.clip_rect = None
+        self.selected_element = None
+        self.dragging = None
+        self.is_draggable = False
+        self.clip_rect = None
         # self.set_clip_area()
 
     def apply_theme(self):
@@ -40,64 +44,31 @@ class GUI(ElementGroup):
                     print("found theme")
                     theme_dict[theme].style_gui(self)
 
-    # def blit_elements(self, element, index):
-    #     if element.is_visible:
-    #         element.blit(element.content_surface, element.content_rect.topleft)
-    #         if hasattr(self.elements[index], "elements"):
-    #             element.blit_elements()
-    #         self.blit(element, (element.pos_x, element.pos_y))
-
     def fill_elements(self):
-
-        for index, element in enumerate(self.elements_to_update):
-            if hasattr(self.elements_to_update[index], "elements"):
-                element.fill_elements()
-
-            if not element.corner_rounding:
-                element.fill(element.color, element.rect)
-                element.content_surface.fill(element.color)
-            elif element.corner_rounding:
-                pygame.draw.rect(element, element.color, element.get_rect(), border_radius=element.corner_rounding)
-                pygame.draw.rect(element.content_surface, element.color, element.content_rect,
-                                 border_radius=element.corner_rounding)
+        for element in self.elements_to_update:
+            element.fill_elements()
 
         self.elements_to_update = []
 
-    # def draw_element_border(self, element, index):
-    #     if element.has_border:
-    #         if hasattr(self.elements[index], "elements"):
-    #             element.draw_element_border()
-    #         pygame.draw.rect(element, (1, 1, 1), (0, 0, element.width - abs((element.border_thickness % 2) - 1),
-    #                                               element.height - abs((element.border_thickness % 2) - 1)),
-    #                          element.border_thickness, border_radius=element.corner_rounding)
-
-    # def draw_text_to_elements(self, element, index):
-    #     if hasattr(self.elements[index], "elements"):
-    #         element.draw_text_to_elements()
-    #
-    #     element.draw_text(element.content_surface)
-
-    # def set_clip_area(self):
-    #     left, top, right, bottom = self.width, self.height, 0, 0
-    #     for element in self.elements:
-    #         if element.rect.left < left:
-    #             left = element.rect.left - 1
-    #         if element.rect.top < top:
-    #             top = element.rect.top - 1
-    #         if element.rect.right > right:
-    #             right = element.rect.right + 1
-    #         if element.rect.bottom > bottom:
-    #             bottom = element.rect.bottom + 1
-    #     self.clip_rect = pygame.Rect(left, top, right - left, bottom - top)
-    #     self.set_clip(self.clip_rect)
+    def set_clip_area(self):
+        left, top, right, bottom = 0, 0, self.width, self.height
+        for element in self.elements:
+            if element.rect.left < left:
+                left = element.rect.left + element.pos_x
+            if element.rect.top < top:
+                top = element.rect.top + element.pos_y
+            if element.rect.right > right:
+                right = element.rect.right + element.pos_x
+            if element.rect.bottom > bottom:
+                bottom = element.rect.bottom + element.pos_y
+        self.clip_rect = pygame.Rect(left, top, right - left, bottom - top)
+        self.set_clip(self.clip_rect)
 
     def update(self, screen):
         # screen to blit to
-        # self.set_clip_area()
         if self.need_update:
             self.fill((0, 0, 0))
-            # self.set_clip_area()
-        self.set_colorkey((0, 0, 0))
+            self.set_clip_area()
         self.fill_elements()
         for element in self.elements:
             if element.is_visible:
@@ -106,6 +77,25 @@ class GUI(ElementGroup):
                 element.blit_elements(self)
         screen.blit(self, (0, 0))
         self.need_update = False
+
+    def select_element(self, mouse_pos):
+        reversed_elements = self.elements[::-1]
+        for element in reversed_elements:
+            if element.is_visible and element.is_draggable:
+                if element.rect.collidepoint(element.get_mouse_pos(mouse_pos)):
+                    element.drag_toggle = True
+                    self.selected_element = element  # .drag_element(mouse_pos, datetime.now())
+                    self.dragging = self.selected_element.drag_element(mouse_pos, datetime.now())
+                    break
+
+    def drag_selected(self):
+        if self.selected_element:
+            self.selected_element.pos_x, self.selected_element.pos_y = next(self.dragging)
+            self.need_update = True
+
+    def let_go(self):
+        self.selected_element = None
+        self.dragging = None
 
 
 class GUIEncoder(JSONEncoder):

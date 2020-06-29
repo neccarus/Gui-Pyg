@@ -53,8 +53,7 @@ class Element(pygame.Surface):
         self.text_rect = self.text_obj.get_rect()
         self.text_rect.topleft = (self.font_pos_x, self.font_pos_y)
         self.set_colorkey((0, 0, 0))
-        self.fill((0, 0, 0),
-                  self.rect)  # colorkey and fill to prevent weird behaviour on corners when there is corner rounding
+        self.fill((0, 0, 0), self.rect)  # colorkey and fill to prevent weird behaviour on corners when there is corner rounding
         self.has_border = True
         self.is_draggable = False
         self.drag_toggle = False
@@ -68,40 +67,29 @@ class Element(pygame.Surface):
         self.is_visible = not self.is_visible
 
     def fill_elements(self):
-        for index, element in enumerate(self.elements):
-            if hasattr(self.elements[index], "elements"):
-                element.fill_elements()
-            if not element.corner_rounding:
-                element.fill(element.color, element.rect)
-                element.content_surface.fill(element.color)
+        if not self.corner_rounding:
+            self.fill(self.color, self.rect)
+            self.content_surface.fill(self.color)
 
-            elif element.corner_rounding:
-                pygame.draw.rect(element, element.color, element.rect, border_radius=element.corner_rounding)
-                pygame.draw.rect(element.content_surface, element.color, element.content_rect,
-                                 border_radius=element.corner_rounding)
+        elif self.corner_rounding:
+            pygame.draw.rect(self, self.color, self.rect, border_radius=self.corner_rounding)
+            pygame.draw.rect(self.content_surface, self.color, self.content_rect,
+                             border_radius=self.corner_rounding)
 
     def blit_elements(self, surface):
         self.blit(self.content_surface, self.content_rect.topleft)
         surface.blit(self, (self.pos_x, self.pos_y))
 
     def draw_element_border(self):
-        # for index, element in enumerate(self.elements):
-        #     if element.has_border:
-        #         if hasattr(self.elements[index], "elements"):
-        #             element.draw_element_border()
         pygame.draw.rect(self, self.border_color,
                          (0, 0, self.width - abs((self.border_thickness % 2) - 1),
                           self.height - abs((self.border_thickness % 2) - 1)),
                          self.border_thickness, border_radius=self.corner_rounding)
 
     def draw_text_to_elements(self):
-        # for index, element in enumerate(self.elements):
-        #     if hasattr(self.elements[index], "elements"):
-        #         element.draw_text_to_elements(element)
         self.draw_text(self.content_surface)
 
     def draw_text(self, surface):
-
         surface.blit(self.text_obj, self.text_rect)
 
     def drag_element(self, mouse_pos=(0, 0), timer=0):
