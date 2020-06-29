@@ -38,6 +38,8 @@ class Element(pygame.Surface):
         self.margin_left = 0
         self.margin_right = 0
         self.rect = self.get_rect()
+        self.rect.width -= abs((self.border_thickness % 2) - 1)
+        self.rect.height -= abs((self.border_thickness % 2) - 1)
         self.content_rect = pygame.Rect((self.margin_left,
                                          self.margin_top),
                                         (self.width - self.margin_right - self.border_thickness,

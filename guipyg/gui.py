@@ -69,12 +69,12 @@ class GUI(ElementGroup):
         if self.need_update:
             self.fill((0, 0, 0))
             self.set_clip_area()
-        self.fill_elements()
-        for element in self.elements:
-            if element.is_visible:
-                element.draw_text_to_elements()
-                element.draw_element_border()
-                element.blit_elements(self)
+            self.fill_elements()
+            for element in self.elements:
+                if element.is_visible:
+                    element.draw_text_to_elements()
+                    element.draw_element_border()
+                    element.blit_elements(self)
         screen.blit(self, (0, 0))
         self.need_update = False
 

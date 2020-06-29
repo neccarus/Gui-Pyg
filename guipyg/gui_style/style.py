@@ -39,6 +39,8 @@ class Style(object):
         element.drop_shadow_right = self.drop_shadow_right
         element.drop_shadow_color = self.drop_shadow_color
         element.drop_shadow_alpha = self.drop_shadow_alpha
+        element.rect.width -= abs((element.border_thickness % 2) - 1)
+        element.rect.height -= abs((element.border_thickness % 2) - 1)
 
 
 class FontStyle(Style):
