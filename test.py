@@ -7,6 +7,9 @@ from guipyg import create_gui
 from guipyg.gui_element.button import Button
 from guipyg.gui_element.menu import Menu
 from guipyg.gui_element.element import Element
+import os
+
+os.environ['SDL_VIDEO_CENTERED'] = '1'
 
 pygame.init()
 
@@ -36,7 +39,7 @@ button_three = Button(150, 50, 10, 30, my_menu.toggle_visibility, "Button 3", (1
 my_menu_two = Menu(250, 200, 500, 50, "Menu Two", color=(50, 50, 50), elements=[button_three])
 button_four = Button(150, 50, 10, 50, function=clicker, name="Button Four", color=(150, 150, 150))
 my_menu_three = Menu(200, 150, 400, 200, "Menu Three", (50, 50, 50), elements=[button_four])
-my_gui = create_gui(1280, 720, 0, 0, theme="my_theme")
+my_gui = create_gui(848, 480, 0, 0, theme="my_theme")
 my_gui.elements.append(my_menu)
 my_gui.elements.append(my_menu_two)
 my_gui.elements.append(my_menu_three)
@@ -48,7 +51,7 @@ gui_create_timer_end = datetime.now()
 
 print(f"It took {(gui_create_timer_end - gui_create_timer_start).total_seconds()} seconds to create the GUI.")
 
-screen = pygame.display.set_mode((1280, 720), 0, 32)
+screen = pygame.display.set_mode((848, 480), pygame.FULLSCREEN | pygame.SCALED)
 # pygame.display.toggle_fullscreen()
 pygame.display.set_caption("Testing")
 
@@ -83,15 +86,25 @@ print(f"It took {(gui_create_timer_end - gui_create_timer_start).total_seconds()
 clock = pygame.time.Clock()
 drag = None
 while True:
-    current_mouse_pos = pygame.mouse.get_pos()
+
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             sys.exit()
 
+        if event.type == pygame.KEYDOWN:
+            if event.key == ord('q'):
+                sys.exit()
+            if event.key == ord('f'):
+                pygame.display.set_mode((848, 480), pygame.FULLSCREEN | pygame.SCALED)
+            if event.key == ord('g'):
+                pygame.display.set_mode((848, 480), pygame.SCALED)
+
         if event.type == pygame.MOUSEBUTTONDOWN:
+            current_mouse_pos = pygame.mouse.get_pos()
             my_gui.select_element(current_mouse_pos)
 
         if event.type == pygame.MOUSEBUTTONUP:
+            current_mouse_pos = pygame.mouse.get_pos()
             my_gui.let_go()
             reversed_elements = my_gui.elements[::-1]
             for element in reversed_elements:
@@ -103,6 +116,9 @@ while True:
 
     my_gui.update(screen)
     display_fps(str(round(clock.get_fps(), 1)), screen)
+    # try:
+    #     pygame.display.update()
+    # finally:
     pygame.display.update()
     screen.fill((80, 80, 80))
     clock.tick()

@@ -64,28 +64,41 @@ class GUI(ElementGroup):
         self.clip_rect = pygame.Rect(left, top, right - left, bottom - top)
         self.set_clip(self.clip_rect)
 
+    def blit_elements(self):
+        # if self.is_visible:
+        #     for element in self.elements:
+        #         if element.is_visible:
+        #             element.blit_elements(self)
+        #             self.blit_list.append(element, self)
+        #     self.blits(self.blit_list)
+        #     surface.blit(self, (self.pos_x, self.pos_y))
+        super().blit_elements()
+        self.blit_list = []
+
     def update(self, screen):
         # screen to blit to
         if self.need_update:
             self.fill((0, 0, 0))
             self.set_clip_area()
             self.fill_elements()
-            for element in self.elements:
-                if element.is_visible:
-                    element.draw_text_to_elements()
-                    element.draw_element_border()
-                    element.blit_elements(self)
+            # for element in self.elements:
+            #     if element.is_visible:
+            self.draw_text_to_elements()
+            self.draw_element_border()
+            self.blit_elements()
         screen.blit(self, (0, 0))
         self.need_update = False
 
     def select_element(self, mouse_pos):
-        reversed_elements = self.elements[::-1]
-        for element in reversed_elements:
-            if element.is_visible and element.is_draggable:
-                if element.rect.collidepoint(element.get_mouse_pos(mouse_pos)):
+        if not self.selected_element:
+            reversed_elements = self.elements[::-1]
+            for element in reversed_elements:
+                if element.is_visible and element.is_draggable and \
+                        element.rect.collidepoint(element.get_mouse_pos(mouse_pos)):
                     element.drag_toggle = True
                     self.selected_element = element  # .drag_element(mouse_pos, datetime.now())
-                    self.dragging = self.selected_element.drag_element(mouse_pos, datetime.now())
+                    # if element.is_draggable:
+                    self.dragging = self.selected_element.drag_element(mouse_pos)
                     break
 
     def drag_selected(self):
@@ -94,8 +107,11 @@ class GUI(ElementGroup):
             self.need_update = True
 
     def let_go(self):
-        self.selected_element = None
-        self.dragging = None
+        if self.selected_element:
+            self.selected_element.drag_toggle = False
+            next(self.dragging)
+            self.selected_element = None
+            self.dragging = None
 
 
 class GUIEncoder(JSONEncoder):

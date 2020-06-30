@@ -21,33 +21,53 @@ class ElementGroup(Element):
         self.elements = elements
         self.class_name = self.my_name()
         self.is_draggable = True
+        self.blit_list = []  # used to implement pygame.blits()
 
     def fill_elements(self):
         for element in self.elements:
             # if hasattr(element, "elements"):
             element.fill_elements()
-        super().fill_elements()
+        if self.need_update: # if statement down here since we want to check individual elements for changes
+            super().fill_elements()
 
     def draw_element_border(self):
-        for element in self.elements:
-            if element.has_border:
-                element.draw_element_border()
-        super().draw_element_border()
+        if self.is_visible:
+            for element in self.elements:
+                if element.has_border and element.is_visible:
+                    element.draw_element_border()
+                    element.convert_alpha(self)
+            if self.need_update:
+                super().draw_element_border()
 
     def draw_text_to_elements(self):
-        for element in self.elements:
-            element.draw_text_to_elements()
-        self.draw_text(self)
+        if self.is_visible:
+            for element in self.elements:
+                if element.is_visible:
+                    element.draw_text_to_elements()
+            if self.need_update:
+                self.draw_text(self)
         # super().draw_text_to_elements()
 
-    def blit_elements(self, surface):
-        for element in self.elements:
-            element.blit_elements(self)
-        surface.blit(self, (self.pos_x, self.pos_y))
+    # def blit_elements(self, surface):
+    #     if self.is_visible:
+    #         for element in self.elements:
+    #             if element.is_visible:
+    #                 element.blit_elements(self)
+    #         surface.blit(self, (self.pos_x, self.pos_y))
+
+    def blit_elements(self):
+        if self.is_visible:
+            for element in self.elements:
+                if element.is_visible:
+                    element.blit_elements()
+                    self.blit_list.append((element, (element.pos_x, element.pos_y)))
+            if self.need_update:
+                self.blits(self.blit_list, doreturn=False)
+            # surface.blit(self, (self.pos_x, self.pos_y))
 
     def setup(self):
         # run this after initializing the object or anytime a change is made in element positions
-        self.blit_elements(self)
+        self.blit_elements()
 
     def get_mouse_pos(self, mouse_pos=(0, 0)):
         # adjusts the position of the mouse within the ElementGroup
