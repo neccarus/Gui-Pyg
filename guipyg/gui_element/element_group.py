@@ -25,7 +25,6 @@ class ElementGroup(Element):
 
     def fill_elements(self):
         for element in self.elements:
-            # if hasattr(element, "elements"):
             element.fill_elements()
         if self.need_update: # if statement down here since we want to check individual elements for changes
             super().fill_elements()
@@ -35,7 +34,6 @@ class ElementGroup(Element):
             for element in self.elements:
                 if element.has_border and element.is_visible:
                     element.draw_element_border()
-                    element.convert_alpha(self)
             if self.need_update:
                 super().draw_element_border()
 
@@ -46,14 +44,6 @@ class ElementGroup(Element):
                     element.draw_text_to_elements()
             if self.need_update:
                 self.draw_text(self)
-        # super().draw_text_to_elements()
-
-    # def blit_elements(self, surface):
-    #     if self.is_visible:
-    #         for element in self.elements:
-    #             if element.is_visible:
-    #                 element.blit_elements(self)
-    #         surface.blit(self, (self.pos_x, self.pos_y))
 
     def blit_elements(self):
         if self.is_visible:
@@ -63,6 +53,7 @@ class ElementGroup(Element):
                     self.blit_list.append((element, (element.pos_x, element.pos_y)))
             if self.need_update:
                 self.blits(self.blit_list, doreturn=False)
+                self.blit_list = []
             # surface.blit(self, (self.pos_x, self.pos_y))
 
     def setup(self):

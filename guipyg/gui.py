@@ -64,25 +64,12 @@ class GUI(ElementGroup):
         self.clip_rect = pygame.Rect(left, top, right - left, bottom - top)
         self.set_clip(self.clip_rect)
 
-    def blit_elements(self):
-        # if self.is_visible:
-        #     for element in self.elements:
-        #         if element.is_visible:
-        #             element.blit_elements(self)
-        #             self.blit_list.append(element, self)
-        #     self.blits(self.blit_list)
-        #     surface.blit(self, (self.pos_x, self.pos_y))
-        super().blit_elements()
-        self.blit_list = []
-
     def update(self, screen):
         # screen to blit to
         if self.need_update:
             self.fill((0, 0, 0))
             self.set_clip_area()
             self.fill_elements()
-            # for element in self.elements:
-            #     if element.is_visible:
             self.draw_text_to_elements()
             self.draw_element_border()
             self.blit_elements()
