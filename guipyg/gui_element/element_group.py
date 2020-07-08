@@ -10,13 +10,6 @@ class ElementGroup(Element):
                  is_visible=True, elements=None, font_color=(10, 10, 10), **_):
         if elements is None:
             elements = []
-        self.width = width
-        self.height = height
-        self.name = name
-        self.color = color
-        self.style = style
-        self.pos_x = pos_x
-        self.pos_y = pos_y
         super().__init__(width, height, pos_x, pos_y, name, color, style, is_visible, font_color)
         self.elements = elements
         self.class_name = self.my_name()
@@ -30,12 +23,12 @@ class ElementGroup(Element):
             super().fill_elements()
 
     def draw_element_border(self):
-        if self.is_visible:
-            for element in self.elements:
-                if element.has_border and element.is_visible:
-                    element.draw_element_border()
-            if self.need_update:
-                super().draw_element_border()
+        # if self.is_visible:
+        for element in self.elements:
+            if element.has_border:
+                element.draw_element_border()
+        if self.need_update:
+            super().draw_element_border()
 
     def draw_text_to_elements(self):
         if self.is_visible:

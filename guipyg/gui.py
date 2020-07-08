@@ -39,10 +39,17 @@ class GUI(ElementGroup):
     def apply_theme(self):
         if self.theme:
             for theme in theme_dict:
-                print(theme)
+                # print(theme)
                 if self.theme == theme_dict[theme].theme_name:
-                    print("found theme")
+                    print(f"found theme {theme}")
                     theme_dict[theme].style_gui(self)
+                    self.elements_to_update = self.elements
+                    for element in self.elements:
+                        element.need_update = True
+                        if hasattr(element, "elements"):
+                            for inner_element in element.elements:
+                                inner_element.need_update = True
+                    break
 
     def fill_elements(self):
         for element in self.elements_to_update:
@@ -136,12 +143,23 @@ def decode_element(element, cls=Element, class_types=None):
 
 
 def match_element_name(gui, name):
+    # print(f'GUI: {gui.name}, name: {name}')
+
     if hasattr(gui, "elements"):
         for index, element in enumerate(gui.elements):
             if hasattr(element, "elements"):
                 match_element_name(element.elements, name)
             if element.name == name:
                 return element
+    # if gui.name == name:
+    #     print(f'Found a GUI called {name} here')
+    #     return gui
+
+
+def match_gui_name(gui, name):
+    if gui.name == name:
+        print(f'Found a GUI called {name} here')
+        return gui
 
 
 def update_element_functions(gui):
