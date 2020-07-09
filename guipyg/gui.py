@@ -51,6 +51,11 @@ class GUI(ElementGroup):
                                 inner_element.need_update = True
                     break
 
+    def bring_element_to_front(self, element):
+        for index, elements in enumerate(self.elements):
+            if elements == element:
+                self.elements += [self.elements.pop(index)]
+
     def fill_elements(self):
         for element in self.elements_to_update:
             element.fill_elements()
@@ -86,18 +91,27 @@ class GUI(ElementGroup):
     def select_element(self, mouse_pos):
         if not self.selected_element:
             reversed_elements = self.elements[::-1]
-            for element in reversed_elements:
+            for index, element in enumerate(reversed_elements):
                 if element.is_visible and element.is_draggable and \
                         element.rect.collidepoint(element.get_mouse_pos(mouse_pos)):
                     element.drag_toggle = True
                     self.selected_element = element  # .drag_element(mouse_pos, datetime.now())
                     # if element.is_draggable:
                     self.dragging = self.selected_element.drag_element(mouse_pos)
+                    self.bring_element_to_front(element)
                     break
 
     def drag_selected(self):
         if self.selected_element:
             self.selected_element.pos_x, self.selected_element.pos_y = next(self.dragging)
+            if self.selected_element.pos_x < 0:
+                self.selected_element.pos_x = 0
+            elif self.selected_element.pos_x + self.selected_element.width > self.width:
+                self.selected_element.pos_x = self.width - self.selected_element.width
+            if self.selected_element.pos_y < 0:
+                self.selected_element.pos_y = 0
+            elif self.selected_element.pos_y + self.selected_element.height > self.height:
+                self.selected_element.pos_y = self.height - self.selected_element.height
             self.need_update = True
 
     def let_go(self):
@@ -107,6 +121,11 @@ class GUI(ElementGroup):
             self.selected_element = None
             self.dragging = None
 
+    def activate_selected(self, mouse_pos, *args, **kwargs):
+        if self.selected_element:
+            self.selected_element.click(mouse_pos, *args, **kwargs)
+            self.need_update = True
+
 
 class GUIEncoder(JSONEncoder):
 
@@ -114,7 +133,8 @@ class GUIEncoder(JSONEncoder):
         if hasattr(o, "function"):
             o.function = o.function.__name__
         if hasattr(o, "elements_to_update"):
-            o.elements_to_update = None
+            # o.elements_to_update = None
+            del o.elements_to_update
         if hasattr(o, "__dict__"):
             return o.__dict__
         else:
@@ -122,7 +142,12 @@ class GUIEncoder(JSONEncoder):
 
 
 def encode_gui(gui):
-    return json.dumps(gui, skipkeys=True, cls=GUIEncoder, indent=1)
+    return json.dumps(gui, skipkeys=True, cls=GUIEncoder, indent=4)
+
+
+def save_gui(gui, file):
+    with open(file, 'w') as w:
+        json.dump(encode_gui(gui), w)
 
 
 def decode_element(element, cls=Element, class_types=None):
@@ -140,6 +165,14 @@ def decode_element(element, cls=Element, class_types=None):
                 element_obj.elements[index] = obj
 
     return element_obj
+
+
+def load_gui(file):
+    with open(file, 'r') as r:
+        gui_json = json.load(r)
+    gui = decode_gui(gui_json)
+    gui.apply_theme()
+    return gui
 
 
 def match_element_name(gui, name):

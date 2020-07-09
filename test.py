@@ -70,9 +70,7 @@ pygame.display.set_caption("Testing")
 
 gui_create_timer_start = datetime.now()
 
-gui_json = gui.encode_gui(my_gui)
-with open('gui_file.json', 'w') as w:
-    json.dump(gui_json, w)
+gui.save_gui(my_gui, 'gui_file.json')
 
 gui_create_timer_end = datetime.now()
 
@@ -85,10 +83,7 @@ gui.functions["toggle_visibility"] = Element().toggle_visibility
 
 gui_create_timer_start = datetime.now()
 
-with open('gui_file.json', 'r') as r:
-    gui_json = json.load(r)
-my_gui = gui.decode_gui(gui_json)
-my_gui.apply_theme()
+my_gui = gui.load_gui("gui_file.json")
 gui.functions["toggle_visibility"] = gui.match_element_name(my_gui, "Menu One").toggle_visibility
 gui.update_element_functions(my_gui)
 
@@ -119,12 +114,8 @@ while True:
 
         if event.type == pygame.MOUSEBUTTONUP:
             current_mouse_pos = pygame.mouse.get_pos()
+            my_gui.activate_selected(current_mouse_pos, my_gui, theme_dict)
             my_gui.let_go()
-            reversed_elements = my_gui.elements[::-1]
-            for element in reversed_elements:
-                if element.is_visible:
-                    element.click(current_mouse_pos, my_gui, theme_dict)
-                    my_gui.need_update = True
 
     my_gui.drag_selected()
 
