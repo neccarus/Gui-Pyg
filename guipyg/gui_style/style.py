@@ -50,7 +50,7 @@ class Style(object):
                                             element.height - element.margin_bottom - element.border_thickness))
         element.content_surface = pygame.Surface((abs(element.content_rect.width), abs(element.content_rect.height)))
         element.content_surface.set_colorkey(element.color)
-
+        element.set_drop_shadow()
 
 class FontStyle(Style):
 

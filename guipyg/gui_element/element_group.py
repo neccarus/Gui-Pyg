@@ -5,22 +5,45 @@ import pygame
 class ElementGroup(Element):
     # ElementGroup can be a group of any Element(s) or ElementGroup(s)
 
+    @classmethod
+    def deactivate_element(cls, element):
+        for ele in element.elements:
+            if hasattr(ele, "elements"):
+                ElementGroup.deactivate_element(ele)
+            else:
+                Element.deactivate_element(ele)
+        Element.deactivate_element(element)
+
     def __init__(self, width=0, height=0, pos_x=0, pos_y=0, name="Element Group", color=(255, 255, 255),
                  style="default",
                  is_visible=True, elements=None, font_color=(10, 10, 10), **_):
-        if elements is None:
-            elements = []
+        # if elements is None:
+        #     elements = []
         super().__init__(width, height, pos_x, pos_y, name, color, style, is_visible, font_color)
-        self.elements = elements
+        if elements is not None:
+            self.elements = elements
         self.class_name = self.my_name()
         self.is_draggable = True
         self.blit_list = []  # used to implement pygame.blits()
 
-    def fill_elements(self):
+    def draw_drop_shadows(self, surface):
+        # for element in self.elements:
+        if self.is_visible:
+            # if hasattr(self, "elements"):
+            #     self.draw_drop_shadows()
+            if self.has_drop_shadow:
+                pygame.draw.rect(surface,
+                                 self.drop_shadow_color,
+                                 self.drop_shadow_rect,
+                                 self.drop_shadow_thickness,
+                                 self.corner_rounding)
+
+    def fill_elements(self, surface):
         for element in self.elements:
-            element.fill_elements()
+            self.draw_drop_shadows(surface)
+            element.fill_elements(surface)
         if self.need_update: # if statement down here since we want to check individual elements for changes
-            super().fill_elements()
+            super().fill_elements(surface)
 
     def draw_element_border(self):
         # if self.is_visible:

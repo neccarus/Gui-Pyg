@@ -3,7 +3,8 @@ import sys
 import json
 from guipyg import gui
 from datetime import datetime
-from guipyg import create_gui
+# from guipyg import create_gui
+from guipyg.gui import GUI
 from guipyg.gui_element.button import Button
 from guipyg.gui_element.menu import Menu
 from guipyg.gui_element.element import Element
@@ -51,10 +52,11 @@ button_three = Button(150, 50, 10, 30, my_menu.toggle_visibility, "Button 3", (1
 my_menu_two = Menu(250, 200, 500, 50, "Menu Two", color=(50, 50, 50), elements=[button_three])
 button_four = Button(150, 50, 10, 50, function=swap_theme, name="Button 4", color=(150, 150, 150))
 my_menu_three = Menu(200, 150, 400, 200, "Menu Three", (50, 50, 50), elements=[button_four])
-my_gui = create_gui(1280, 720, 0, 0, theme="my_theme")
+my_gui = GUI(1280, 720, 0, 0, theme="my_theme")
 my_gui.elements.append(my_menu)
 my_gui.elements.append(my_menu_two)
 my_gui.elements.append(my_menu_three)
+# my_gui.elements = [my_menu, my_menu_two, my_menu_three]
 my_gui.apply_theme()
 gui.functions["toggle_visibility"] = gui.match_element_name(my_gui, "Menu One").toggle_visibility
 gui.functions["swap_theme"] = swap_theme
@@ -76,10 +78,9 @@ gui_create_timer_end = datetime.now()
 
 print(f"It took {(gui_create_timer_end - gui_create_timer_start).total_seconds()} seconds to save the GUI to a file.")
 
-del my_gui
-
 gui.functions["clicker"] = clicker
-gui.functions["toggle_visibility"] = Element().toggle_visibility
+
+gui.GUI.deactivate_element(my_gui)
 
 gui_create_timer_start = datetime.now()
 
@@ -88,6 +89,7 @@ gui.functions["toggle_visibility"] = gui.match_element_name(my_gui, "Menu One").
 gui.update_element_functions(my_gui)
 
 gui_create_timer_end = datetime.now()
+
 
 print(f"It took {(gui_create_timer_end - gui_create_timer_start).total_seconds()} seconds to load the GUI from a file.")
 
@@ -122,6 +124,7 @@ while True:
     my_gui.update(screen)
     display_fps(str(round(clock.get_fps(), 1)), screen)
     pygame.display.update(my_gui.clip_rect)
+    # pygame.display.update()
     screen.fill((80, 80, 80))
     clock.tick()
 

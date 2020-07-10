@@ -14,11 +14,12 @@ my_first_style.margin_left = 10
 my_first_style.border_thickness = 4
 my_first_style.background_color = (150, 150, 150)
 my_first_style.has_border = True
-my_first_style.border_color = (1, 1, 1)
+my_first_style.drop_shadow_alpha = 200
+my_first_style.border_color = (1, 1, 1, my_first_style.drop_shadow_alpha)
 my_first_style.has_drop_shadow = True
-my_first_style.drop_shadow_bottom = 4
-my_first_style.drop_shadow_color = (1, 1, 1)
-my_first_style.drop_shadow_alpha = 125
+my_first_style.drop_shadow_bottom = 8
+my_first_style.drop_shadow_right = 8
+my_first_style.drop_shadow_color = (0, 0, 0)
 style_dict[my_first_style.style_name] = my_first_style
 # theme_dict["element_group"] = my_first_style
 

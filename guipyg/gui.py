@@ -56,9 +56,9 @@ class GUI(ElementGroup):
             if elements == element:
                 self.elements += [self.elements.pop(index)]
 
-    def fill_elements(self):
+    def fill_elements(self, surface):
         for element in self.elements_to_update:
-            element.fill_elements()
+            element.fill_elements(surface)
 
         self.elements_to_update = []
 
@@ -78,10 +78,11 @@ class GUI(ElementGroup):
 
     def update(self, screen):
         # screen to blit to
-        if self.need_update:
+        if self.need_update and self.is_active:
             self.fill((0, 0, 0))
             self.set_clip_area()
-            self.fill_elements()
+            # self.draw_drop_shadows()
+            self.fill_elements(screen)
             self.draw_text_to_elements()
             self.draw_element_border()
             self.blit_elements()
@@ -176,17 +177,12 @@ def load_gui(file):
 
 
 def match_element_name(gui, name):
-    # print(f'GUI: {gui.name}, name: {name}')
-
     if hasattr(gui, "elements"):
         for index, element in enumerate(gui.elements):
             if hasattr(element, "elements"):
                 match_element_name(element.elements, name)
             if element.name == name:
                 return element
-    # if gui.name == name:
-    #     print(f'Found a GUI called {name} here')
-    #     return gui
 
 
 def match_gui_name(gui, name):

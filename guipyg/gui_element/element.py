@@ -6,6 +6,10 @@ from functools import wraps
 
 
 class Element(pygame.Surface):
+    id_ = 0
+    element_dict = {}  # dict structure {id: element}
+    active_elements = []  # list all active elements
+
     # functions is a list of dictionaries meant to store all functions belonging to each Element
     # function: stores the function,
     # arguments: stores any static arguments if the Element has one purpose,
@@ -33,6 +37,23 @@ class Element(pygame.Surface):
     def my_name(cls):
         return cls.__name__
 
+    @classmethod
+    def new_id(cls, element):
+        element.id_ = cls.id_
+        cls.id_ += 1
+
+    @classmethod
+    def new_element(cls, element):
+        cls.element_dict[element.id_] = element
+
+    @classmethod
+    def activate_element(cls, element):
+        cls.active_elements.append(element)
+
+    @classmethod
+    def deactivate_element(cls, element):
+        cls.active_elements.remove(element)
+
     def class_name(self):
         return self.__class__.__name__
 
@@ -41,9 +62,22 @@ class Element(pygame.Surface):
             if self.style == style_dict[style].style_name:
                 style_dict[style].style_element(self)
 
+    def set_drop_shadow(self):
+        self.drop_shadow_thickness = (max(self.drop_shadow_left, self.drop_shadow_right,
+                                          self.drop_shadow_top, self.drop_shadow_bottom)
+                                      + self.corner_rounding)
+        self.drop_shadow_rect = pygame.Rect(0,
+                                            0,
+                                            self.width + self.drop_shadow_right + self.drop_shadow_left,
+                                            self.height + self.drop_shadow_bottom + self.drop_shadow_top)
+        # self.drop_shadow_rect.center = self.pos_x + (self.width // 2), self.pos_y + (self.height // 2)
+        self.drop_shadow_rect.center = self.rect.center
+
     def __init__(self, width=0, height=0, pos_x=0, pos_y=0, name="Element", color=(255, 255, 255), style="default",
                  is_visible=True, font_color=(10, 10, 10), **_):
         super().__init__((width, height), pygame.HWSURFACE)
+        Element.new_id(self)
+        Element.new_element(self)
         self.width = width
         self.height = height
         self.pos_x = pos_x
@@ -84,6 +118,26 @@ class Element(pygame.Surface):
         self.drag_toggle = False
         self.set_style()
         self.need_update = True  # hopefully will reduce calls to blit and fill
+        self.has_drop_shadow = False
+        self.drop_shadow_right = 0
+        self.drop_shadow_left = 0
+        self.drop_shadow_top = 0
+        self.drop_shadow_bottom = 0
+        self.drop_shadow_thickness = 0
+        self.drop_shadow_alpha = 255
+        self.drop_shadow_color = (0, 0, 0, self.drop_shadow_alpha)
+        self.drop_shadow_rect = pygame.Rect(self.pos_x - self.drop_shadow_left,
+                                            self.pos_y - self.drop_shadow_top,
+                                            self.width + self.drop_shadow_right,
+                                            self.height + self.drop_shadow_bottom)
+        self.drop_shadow_position = self.rect.center
+        self.set_drop_shadow()
+        self.is_active = True
+        Element.activate_element(self)
+        # print(f"{self.my_name()}: {self.id_}")
+
+    def __str__(self):
+        return f"{self.my_name()}, {self.id_}"
 
     # @property
     # def arguments(self):
@@ -115,7 +169,7 @@ class Element(pygame.Surface):
     def toggle_visibility(self, *_, **__):
         self.is_visible = not self.is_visible
 
-    def fill_elements(self):
+    def fill_elements(self, surface):
         if self.need_update:
             if not self.corner_rounding:
                 self.fill(self.color, self.rect)
@@ -182,6 +236,8 @@ class Element(pygame.Surface):
 class ElementEncoder(JSONEncoder):
 
     def default(self, o):
+        if hasattr(o, "_id"):
+            del o._id
         return o.__dict__
 
 
