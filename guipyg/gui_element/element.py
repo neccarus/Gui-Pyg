@@ -73,7 +73,7 @@ class Element(pygame.Surface):
         # self.drop_shadow_rect.center = self.pos_x + (self.width // 2), self.pos_y + (self.height // 2)
         self.drop_shadow_rect.center = self.rect.center
 
-    def __init__(self, width=0, height=0, pos_x=0, pos_y=0, name="Element", color=(255, 255, 255), style="default",
+    def __init__(self, width=0, height=0, pos_x=0, pos_y=0, name="Element", msg="", color=(255, 255, 255), style="default",
                  is_visible=True, font_color=(10, 10, 10), **_):
         super().__init__((width, height), pygame.HWSURFACE)
         Element.new_id(self)
@@ -83,6 +83,7 @@ class Element(pygame.Surface):
         self.pos_x = pos_x
         self.pos_y = pos_y
         self.name = name
+        self.msg = msg
         self.color = color
         self.style = style
         self.is_visible = is_visible
@@ -161,6 +162,9 @@ class Element(pygame.Surface):
     #         Element.add_function(function, arguments, self.name, target)
     #     else:
     #         Element.add_function(function, arguments, self.name)
+
+    def click(self, *args, **kwargs):
+        return None
 
     def get_mouse_pos(self, mouse_pos=(0, 0)):
         # for compatibility with ElementGroup

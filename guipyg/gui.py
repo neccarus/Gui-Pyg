@@ -6,23 +6,24 @@ from .gui_element.element import Element
 from .gui_element.toggleable_element import ToggleableElement
 from .gui_element.popup import Popup
 from .gui_element.element_group import ElementGroup
+from .gui_element.textbox import TextBox
 from .gui_element.menu import Menu
 from .gui_style.style_item import theme_dict
 from datetime import datetime
 
 class_types = {"Element": Element, "Button": Button, "Popup": Popup, "ToggleableElement": ToggleableElement,
-               "ElementGroup": ElementGroup, "Menu": Menu}
+               "ElementGroup": ElementGroup, "Menu": Menu, "TextBox": TextBox}
 functions = {}
 
 
 class GUI(ElementGroup):
 
-    def __init__(self, width=0, height=0, pos_x=0, pos_y=0, name="GUI", elements=None, theme=None, *_, **__):
+    def __init__(self, width=0, height=0, pos_x=0, pos_y=0, name="GUI", msg="", elements=None, theme=None, *_, **__):
         if elements is None:
             elements = []
         self.width = width
         self.height = height
-        super().__init__(width, height, pos_x, pos_y, name, elements=elements)
+        super().__init__(width, height, pos_x, pos_y, name, msg, elements=elements)
         self.pos_x = pos_x
         self.pos_y = pos_y
         self.set_colorkey((0, 0, 0))

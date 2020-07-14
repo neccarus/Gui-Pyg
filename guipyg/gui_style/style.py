@@ -49,6 +49,8 @@ class Style(object):
                                            (element.width - element.margin_right - element.border_thickness,
                                             element.height - element.margin_bottom - element.border_thickness))
         element.content_surface = pygame.Surface((abs(element.content_rect.width), abs(element.content_rect.height)))
+        if element.class_name == "TextBox":
+            element.get_text_box()
         element.content_surface.set_colorkey(element.color)
         element.set_drop_shadow()
 
