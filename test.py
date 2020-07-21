@@ -68,7 +68,6 @@ gui_create_timer_end = datetime.now()
 
 print(f"It took {(gui_create_timer_end - gui_create_timer_start).total_seconds()} seconds to create the GUI.")
 
-# screen = pygame.display.set_mode((848, 480), pygame.FULLSCREEN | pygame.SCALED)
 screen = pygame.display.set_mode(SCREENSIZE)
 pygame.display.set_caption("Testing")
 
@@ -79,10 +78,12 @@ gui.save_gui(my_gui, 'gui_file.json')
 gui_create_timer_end = datetime.now()
 
 print(f"It took {(gui_create_timer_end - gui_create_timer_start).total_seconds()} seconds to save the GUI to a file.")
+del my_gui
+del button_one, button_two, button_three, button_four, my_menu, my_menu_two, my_menu_three, text_box
 
 gui.functions["clicker"] = clicker
 
-gui.GUI.deactivate_element(my_gui)
+# gui.GUI.deactivate_element(my_gui)
 
 gui_create_timer_start = datetime.now()
 
@@ -96,7 +97,6 @@ gui_create_timer_end = datetime.now()
 print(f"It took {(gui_create_timer_end - gui_create_timer_start).total_seconds()} seconds to load the GUI from a file.")
 
 clock = pygame.time.Clock()
-drag = None
 while True:
 
     for event in pygame.event.get():
@@ -104,12 +104,11 @@ while True:
             sys.exit()
 
         if event.type == pygame.KEYDOWN:
-            if event.key == ord('q'):
+            if event.key == pygame.K_q or event.key == pygame.K_ESCAPE:
                 sys.exit()
-            if event.key == ord('f'):
+            if event.key == pygame.K_f:
                 pygame.display.set_mode(SCREENSIZE, pygame.FULLSCREEN | pygame.SCALED)
-            if event.key == ord('g'):
-                # pygame.display.set_mode((848, 480), pygame.SCALED)
+            if event.key == pygame.K_g:
                 pygame.display.set_mode(SCREENSIZE)
 
         if event.type == pygame.MOUSEBUTTONDOWN:

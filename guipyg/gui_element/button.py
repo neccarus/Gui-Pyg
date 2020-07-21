@@ -4,13 +4,15 @@ from .toggleable_element import ToggleableElement
 # A single GUI element with a function attached
 class Button(ToggleableElement):
 
-    def __init__(self, width=0, height=0, pos_x=0, pos_y=0, function=None, name="Button", msg="", color=(255, 255, 255),
+    def __init__(self, width=0, height=0, pos_x=0, pos_y=0, function=None,
+                 name="Button", msg="", color=(255, 255, 255),
                  style="default", is_visible=True, **_):
         self.function = function
-        super().__init__(width, height, pos_x, pos_y, name=name, msg=msg, color=color, style=style, is_visible=is_visible)
+        super().__init__(width, height, pos_x, pos_y, name=name, msg=msg,
+                         color=color, style=style, is_visible=is_visible)
         self.font_pos_x, self.font_pos_y = self.rect.center
 
-    def toggle_click(self):
+    def toggle_click(self):  # TODO: does this do anything? Does it need to be here?
         self.toggle = not self.toggle
 
     def get_click(self, mouse_pos=(0, 0)):
@@ -26,7 +28,7 @@ class Button(ToggleableElement):
     #         # return self.function(mouse_pos, *args, **kwargs)
     #         return self.function(*args, **kwargs)
 
-    def click(self, mouse_pos=(0, 0), *args, **kwargs):
+    def click(self, mouse_pos=(0, 0), *args, **kwargs):  # TODO: this method needs to be restructured in some way
         self.get_click(mouse_pos)
         if self.toggle:
             self.toggle_click()

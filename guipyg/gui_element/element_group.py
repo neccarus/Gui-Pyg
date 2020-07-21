@@ -42,7 +42,7 @@ class ElementGroup(Element):
         for element in self.elements:
             self.draw_drop_shadows(surface)
             element.fill_elements(surface)
-        if self.need_update: # if statement down here since we want to check individual elements for changes
+        if self.need_update:  # if statement down here since we want to check individual elements for changes
             super().fill_elements(surface)
 
     def draw_element_border(self):

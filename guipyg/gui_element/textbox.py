@@ -2,15 +2,15 @@ from .element import Element
 import pygame
 
 
-class TextBox(Element):
+class TextBox(Element): # TODO: this class might serve better as an element group containing 2 elements, Title and TextBox
 
     def __init__(self, width=0, height=0, pos_x=0, pos_y=0, name="Element", msg="", color=(245, 245, 245),
                  style="default", is_visible=True, font_color=(10, 10, 10), mutable=True, text="",
                  default_text="Please type here...", **_):
+        self.text_gap = 2
         super().__init__(width, height, pos_x, pos_y, name, msg, color, style, is_visible, font_color, **_)
         self.mutable = mutable
         self.default_text = default_text
-        # self.text_gap = 2
         if text == "" and self.mutable:
             self.text = self.default_text
         elif text != "":
@@ -20,7 +20,7 @@ class TextBox(Element):
 
     def get_text_box(self):
         self.text_rect = pygame.Rect((self.margin_left + self.border_thickness,
-                                      self.margin_top + self.font.get_ascent() + self.border_thickness + 2),
+                                      self.margin_top + self.font.get_ascent() + self.border_thickness + self.text_gap),
                                      (self.width - (self.margin_right + self.margin_left + self.border_thickness + self.corner_rounding),
                                       self.height - self.margin_bottom - self.border_thickness - self.font.get_height()))
         self.text_surface = pygame.Surface((abs(self.text_rect.width), abs(self.text_rect.height)))

@@ -7,8 +7,11 @@ from functools import wraps
 
 class Element(pygame.Surface):
     id_ = 0
-    element_dict = {}  # dict structure {id: element}
-    active_elements = []  # list all active elements
+    _element_dict = {}  # dict structure {id: element}
+    # TODO: need to make use of element_dict
+    _active_elements = []  # list all active elements
+    # TODO: need to make use of active_elements
+    # TODO: need a list of functions stored here, one idea is to build a new Function class to store these here
 
     # functions is a list of dictionaries meant to store all functions belonging to each Element
     # function: stores the function,
@@ -44,15 +47,15 @@ class Element(pygame.Surface):
 
     @classmethod
     def new_element(cls, element):
-        cls.element_dict[element.id_] = element
+        cls._element_dict[element.id_] = element
 
     @classmethod
     def activate_element(cls, element):
-        cls.active_elements.append(element)
+        cls._active_elements.append(element)
 
     @classmethod
     def deactivate_element(cls, element):
-        cls.active_elements.remove(element)
+        cls._active_elements.remove(element)
 
     def class_name(self):
         return self.__class__.__name__
@@ -131,7 +134,7 @@ class Element(pygame.Surface):
                                             self.pos_y - self.drop_shadow_top,
                                             self.width + self.drop_shadow_right,
                                             self.height + self.drop_shadow_bottom)
-        self.drop_shadow_position = self.rect.center
+        self.drop_shadow_position = self.rect.center # TODO: needs to be in relation to the element's parent, not the elements itself
         self.set_drop_shadow()
         self.is_active = True
         Element.activate_element(self)
@@ -139,6 +142,12 @@ class Element(pygame.Surface):
 
     def __str__(self):
         return f"{self.my_name()}, {self.id_}"
+
+    def __del__(self):
+        self.is_active = False
+        Element.deactivate_element(self)
+        if self in Element._element_dict:
+            Element._element_dict.pop(self.name)
 
     # @property
     # def arguments(self):

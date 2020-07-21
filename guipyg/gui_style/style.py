@@ -42,13 +42,13 @@ class Style(object):
         element.drop_shadow_alpha = self.drop_shadow_alpha
         element.rect = element.get_rect()
         element.fill((0, 0, 0), element.rect) # fill element before changing dimensions to avoid anomalies
-        element.rect.width -= abs((element.border_thickness % 2) - 1)
-        element.rect.height -= abs((element.border_thickness % 2) - 1)
-        element.content_rect = pygame.Rect((element.margin_left,
+        element.rect.width -= abs((element.border_thickness % 2) - 1) # TODO: this should probably be an Element side method
+        element.rect.height -= abs((element.border_thickness % 2) - 1) # TODO: this should probably be an Element side method
+        element.content_rect = pygame.Rect((element.margin_left,  # TODO: this should probably be an Element side method
                                             element.margin_top),
                                            (element.width - element.margin_right - element.border_thickness,
                                             element.height - element.margin_bottom - element.border_thickness))
-        element.content_surface = pygame.Surface((abs(element.content_rect.width), abs(element.content_rect.height)))
+        element.content_surface = pygame.Surface((abs(element.content_rect.width), abs(element.content_rect.height))) # TODO: this should probably be an Element side method
         if element.class_name == "TextBox":
             element.get_text_box()
         element.content_surface.set_colorkey(element.color)

@@ -26,7 +26,7 @@ class GUI(ElementGroup):
         super().__init__(width, height, pos_x, pos_y, name, msg, elements=elements)
         self.pos_x = pos_x
         self.pos_y = pos_y
-        self.set_colorkey((0, 0, 0))
+        self.set_colorkey((0, 0, 0)) # TODO: should not be hardcoded
         self.elements = elements
         self.elements_to_update = self.elements
         self.theme = theme  # receives a Theme object from style module, used to stylize all elements
@@ -77,7 +77,7 @@ class GUI(ElementGroup):
         self.clip_rect = pygame.Rect(left, top, right - left, bottom - top)
         self.set_clip(self.clip_rect)
 
-    def update(self, screen):
+    def update(self, screen): # TODO: there must be a more efficient way to do this than have every function loop over every element
         # screen to blit to
         if self.need_update and self.is_active:
             self.fill((0, 0, 0))
@@ -103,7 +103,7 @@ class GUI(ElementGroup):
                     self.bring_element_to_front(element)
                     break
 
-    def drag_selected(self):
+    def drag_selected(self): # TODO: Figure out solution to drag elements from inside of other element_groups
         if self.selected_element:
             self.selected_element.pos_x, self.selected_element.pos_y = next(self.dragging)
             if self.selected_element.pos_x < 0:
@@ -123,7 +123,7 @@ class GUI(ElementGroup):
             self.selected_element = None
             self.dragging = None
 
-    def activate_selected(self, mouse_pos, *args, **kwargs):
+    def activate_selected(self, mouse_pos, *args, **kwargs): # TODO: This should be changed to enable keyboard shortcuts to access the functions of any elements
         if self.selected_element:
             self.selected_element.click(mouse_pos, *args, **kwargs)
             self.need_update = True
