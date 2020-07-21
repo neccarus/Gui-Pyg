@@ -47,7 +47,7 @@ def swap_theme(gui_obj, themes):
 gui_create_timer_start = datetime.now()
 
 button_one = Button(200, 50, 10, 50, function=clicker, name="Button One", msg="Click Me!", color=(150, 150, 150))
-#button_one.function = button_one.StoredFunction()  # TODO: finish this line
+button_one.function = button_one.StoredFunction("", "__main__", "clicker", None)  # TODO: finish this line
 button_two = Button(200, 50, 10, 110, function=clicker, name="Button Two", msg="Click Me!", color=(150, 150, 150))
 text_box = TextBox(200, 200, 10, 170, "Text")
 my_menu = Menu(400, 400, 50, 50, "Menu One", color=(50, 50, 50), elements=[button_one, button_two, text_box], is_visible=False)

@@ -132,8 +132,9 @@ class GUI(ElementGroup):
 class GUIEncoder(JSONEncoder):
 
     def default(self, o):
-        if hasattr(o, "function"):
-            o.function = o.function.__name__
+        # if hasattr(o, "function"):
+        #     if o.function:
+        #         o.function = o.function.__name__
         if hasattr(o, "elements_to_update"):
             # o.elements_to_update = None
             del o.elements_to_update
@@ -153,13 +154,20 @@ def save_gui(gui, file):
 
 
 def decode_element(element, cls=Element, class_types=None):
+    #  TODO: this should probably be in the 'element' module
     if type(element) != dict:
         element_decode = json.loads(element)
         element_obj = cls(**element_decode)
     else:
         element_obj = cls(**element)
-        if hasattr(element_obj, "function"):
-            element_obj.function = functions[element_obj.function]
+        if hasattr(element_obj, "function") and element_obj.function:
+            #  TODO: need a decode_function method
+            element_obj.function = element_obj.StoredFunction(element_obj["function"]["path"],
+                                                              element_obj["function"]["module"],
+                                                              element_obj["function"]["function"],
+                                                              element_obj["function"]["target"],
+                                                              element_obj["function"]["args"],
+                                                              element_obj["function"]["kwargs"])
         if hasattr(element_obj, "elements"):
             for index, element in enumerate(element_obj.elements):
                 element_name = element["class_name"]
@@ -193,6 +201,7 @@ def match_gui_name(gui, name):
 
 
 def update_element_functions(gui):
+    #  TODO: this function shouldn't exist with properly implemented encoder for 'StoredFunction' class
     if hasattr(gui, "elements"):
         for index, element in enumerate(gui.elements):
             if hasattr(element, "elements"):

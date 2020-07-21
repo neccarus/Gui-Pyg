@@ -254,6 +254,11 @@ class Element(pygame.Surface):
             else:
                 return importlib.import_module(self.module)
 
+        class FunctionEncoder(JSONEncoder):
+
+            def default(self, o):
+                return o.__dict__  #  TODO: need to implement proper functionality by building a function object here
+
 
 # class ElementFunction(object):
 
