@@ -3,6 +3,7 @@ import json
 from json import JSONEncoder
 from guipyg.gui_style.style_item import style_dict
 from functools import wraps
+import importlib
 
 
 class Element(pygame.Surface):
@@ -138,6 +139,7 @@ class Element(pygame.Surface):
         self.set_drop_shadow()
         self.is_active = True
         Element.activate_element(self)
+        self.function = None
         # print(f"{self.my_name()}: {self.id_}")
 
     def __str__(self):
@@ -145,7 +147,7 @@ class Element(pygame.Surface):
 
     def __del__(self):
         self.is_active = False
-        Element.deactivate_element(self)
+        #Element.deactivate_element(self)
         if self in Element._element_dict:
             Element._element_dict.pop(self.name)
 
@@ -224,6 +226,33 @@ class Element(pygame.Surface):
                                                         element_pos_y + mouse_pos_delta[1])
             yield element_pos_delta_x, element_pos_delta_y
         yield None
+
+    class StoredFunction:
+
+        def __init__(self, path, module, function, target, *args, **kwargs):
+            self.path = path  # directory this function is found in
+            self.module = module  # module this function is found in
+            self.function = function
+
+            self.target = target  # target of the function by name
+            self.args = args
+            self.kwargs = kwargs
+
+            self.stored_function = getattr(self.import_module(), self.function)
+
+        def __call__(self, *args, **kwargs):
+            if args or kwargs:
+                return self.stored_function(*args, **kwargs)
+            else:
+                print("no args given")
+                return self.stored_function(*self.args, **self.kwargs)
+
+        def import_module(self):
+            importlib.invalidate_caches()
+            if self.path:
+                return importlib.import_module(self.module, self.path)
+            else:
+                return importlib.import_module(self.module)
 
 
 # class ElementFunction(object):
