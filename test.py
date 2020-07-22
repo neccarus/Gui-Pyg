@@ -92,8 +92,6 @@ print(f"It took {(gui_create_timer_end - gui_create_timer_start).total_seconds()
 del my_gui
 del button_one, button_two, button_three, button_four, my_menu, my_menu_two, my_menu_three, text_box
 
-gui.functions["clicker"] = clicker
-
 # gui.GUI.deactivate_element(my_gui)
 
 gui_create_timer_start = datetime.now()
