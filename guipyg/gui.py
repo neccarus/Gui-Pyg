@@ -9,11 +9,9 @@ from .gui_element.element_group import ElementGroup
 from .gui_element.textbox import TextBox
 from .gui_element.menu import Menu
 from .gui_style.style_item import theme_dict
-from datetime import datetime
 
 class_types = {"Element": Element, "Button": Button, "Popup": Popup, "ToggleableElement": ToggleableElement,
                "ElementGroup": ElementGroup, "Menu": Menu, "TextBox": TextBox}
-functions = {}
 
 
 class GUI(ElementGroup):
@@ -132,9 +130,11 @@ class GUI(ElementGroup):
 class GUIEncoder(JSONEncoder):
 
     def default(self, o):
-        # if hasattr(o, "function"):
-        #     if o.function:
-        #         o.function = o.function.__name__
+        if hasattr(o, "function"):
+            if o.function:
+                o.function = {'path': o.function.path, 'module': o.function.module, 'function': o.function.function, 'target': o.function.target, 'parent': o.function.parent.name}
+                # o.function = o.function.__dict__
+                #  path, module, function, target, parent
         if hasattr(o, "elements_to_update"):
             # o.elements_to_update = None
             del o.elements_to_update
@@ -162,12 +162,8 @@ def decode_element(element, cls=Element, class_types=None):
         element_obj = cls(**element)
         if hasattr(element_obj, "function") and element_obj.function:
             #  TODO: need a decode_function method
-            element_obj.function = element_obj.StoredFunction(element_obj["function"]["path"],
-                                                              element_obj["function"]["module"],
-                                                              element_obj["function"]["function"],
-                                                              element_obj["function"]["target"],
-                                                              element_obj["function"]["args"],
-                                                              element_obj["function"]["kwargs"])
+            # element_obj.function = element_obj.StoredFunction(**element_obj.function)
+            element_obj.function = decode_function(element_obj.function, element_obj)
         if hasattr(element_obj, "elements"):
             for index, element in enumerate(element_obj.elements):
                 element_name = element["class_name"]
@@ -177,27 +173,19 @@ def decode_element(element, cls=Element, class_types=None):
     return element_obj
 
 
+def decode_function(function, element):
+    if function['parent'] is not None:
+        function['parent'] = element
+    function_obj = element.StoredFunction(**function)
+    return function_obj
+
+
 def load_gui(file):
     with open(file, 'r') as r:
         gui_json = json.load(r)
     gui = decode_gui(gui_json)
     gui.apply_theme()
     return gui
-
-
-def match_element_name(gui, name):
-    if hasattr(gui, "elements"):
-        for index, element in enumerate(gui.elements):
-            if hasattr(element, "elements"):
-                match_element_name(element.elements, name)
-            if element.name == name:
-                return element
-
-
-def match_gui_name(gui, name):
-    if gui.name == name:
-        print(f'Found a GUI called {name} here')
-        return gui
 
 
 def update_element_functions(gui):

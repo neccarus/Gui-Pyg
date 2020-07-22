@@ -1,7 +1,6 @@
 from .toggleable_element import ToggleableElement
 
 
-# A single GUI element with a function attached
 class Button(ToggleableElement):
 
     def __init__(self, width=0, height=0, pos_x=0, pos_y=0, function=None,
@@ -21,18 +20,10 @@ class Button(ToggleableElement):
                 self.pos_y <= mouse_pos_y <= (self.pos_y + self.height):
             self.toggle_click()
 
-    # def click(self, mouse_pos=(0, 0), *args, **kwargs):
-    #     self.get_click(mouse_pos)
-    #     if self.toggle:
-    #         self.toggle_click()
-    #         # return self.function(mouse_pos, *args, **kwargs)
-    #         return self.function(*args, **kwargs)
-
     def click(self, mouse_pos=(0, 0), *args, **kwargs):  # TODO: this method needs to be restructured in some way
         self.get_click(mouse_pos)
         if self.toggle:
             self.toggle_click()
-            # return self.function(mouse_pos, *args, **kwargs)
             return self.function(*args, **kwargs)
 
     def draw_text(self, surface):

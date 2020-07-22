@@ -2,40 +2,18 @@ import pygame
 import json
 from json import JSONEncoder
 from guipyg.gui_style.style_item import style_dict
+from guipyg.utils.utils import Instance
 from functools import wraps
 import importlib
 
 
-class Element(pygame.Surface):
+class Element(pygame.Surface, Instance):
     id_ = 0
-    _element_dict = {}  # dict structure {id: element}
-    # TODO: need to make use of element_dict
+    # dict structure {element.name: element}
+    _element_dict = {}
+
     _active_elements = []  # list all active elements
     # TODO: need to make use of active_elements
-    # TODO: need a list of functions stored here, one idea is to build a new Function class to store these here
-
-    # functions is a list of dictionaries meant to store all functions belonging to each Element
-    # function: stores the function,
-    # arguments: stores any static arguments if the Element has one purpose,
-    # origin: the Element this function belongs to specified by the Element's name attribute,
-    # target: if the function is affecting another Element that is stored here, specified by name.
-    # functions = [
-    #     {
-    #         'function': None,
-    #         'arguments': None,
-    #         'origin': None,
-    #         'target': None
-    #     }
-    # ]
-    #
-    # @classmethod
-    # def add_function(cls, function, arguments=None, origin=None, target=None):
-    #     cls.functions.append(
-    #         {'function': function,
-    #          'arguments': arguments,
-    #          'origin': origin,
-    #          'target': target}
-    #     )
 
     @classmethod
     def my_name(cls):
@@ -46,17 +24,17 @@ class Element(pygame.Surface):
         element.id_ = cls.id_
         cls.id_ += 1
 
-    @classmethod
-    def new_element(cls, element):
-        cls._element_dict[element.id_] = element
-
-    @classmethod
-    def activate_element(cls, element):
-        cls._active_elements.append(element)
-
-    @classmethod
-    def deactivate_element(cls, element):
-        cls._active_elements.remove(element)
+    # @classmethod
+    # def new_element(cls, element):
+    #     cls._element_dict[element.name] = element
+    #
+    # @classmethod
+    # def activate_element(cls, element):
+    #     cls._active_elements.append(element)
+    #
+    # @classmethod
+    # def deactivate_element(cls, element):
+    #     cls._active_elements.remove(element)
 
     def class_name(self):
         return self.__class__.__name__
@@ -80,13 +58,14 @@ class Element(pygame.Surface):
     def __init__(self, width=0, height=0, pos_x=0, pos_y=0, name="Element", msg="", color=(255, 255, 255), style="default",
                  is_visible=True, font_color=(10, 10, 10), **_):
         super().__init__((width, height), pygame.HWSURFACE)
+        super().add_instance()
         Element.new_id(self)
-        Element.new_element(self)
         self.width = width
         self.height = height
         self.pos_x = pos_x
         self.pos_y = pos_y
         self.name = name
+        # Element.new_element(self)
         self.msg = msg
         self.color = color
         self.style = style
@@ -115,9 +94,9 @@ class Element(pygame.Surface):
         self.text_obj = self.font.render(self.name, True, self.font_color)
         self.text_rect = self.text_obj.get_rect()
         self.text_rect.topleft = (self.font_pos_x, self.font_pos_y)
+        # colorkey and fill to prevent weird behaviour on corners when there is corner rounding
         self.set_colorkey((0, 0, 0))
-        self.fill((0, 0, 0),
-                  self.rect)  # colorkey and fill to prevent weird behaviour on corners when there is corner rounding
+        self.fill((0, 0, 0), self.rect)
         self.has_border = True
         self.is_draggable = False
         self.drag_toggle = False
@@ -138,41 +117,17 @@ class Element(pygame.Surface):
         self.drop_shadow_position = self.rect.center # TODO: needs to be in relation to the element's parent, not the elements itself
         self.set_drop_shadow()
         self.is_active = True
-        Element.activate_element(self)
-        self.function = None
+        # Element.activate_element(self)
         # print(f"{self.my_name()}: {self.id_}")
 
     def __str__(self):
-        return f"{self.my_name()}, {self.id_}"
+        return f"{self.name}"
 
     def __del__(self):
         self.is_active = False
         #Element.deactivate_element(self)
         if self in Element._element_dict:
             Element._element_dict.pop(self.name)
-
-    # @property
-    # def arguments(self):
-    #     return self.arguments
-    #
-    # @arguments.setter
-    # def arguments(self, *args, **kwargs):
-    #     self.arguments = {'args': args,
-    #                       'kwargs': kwargs
-    #                       }
-    #
-    # @property
-    # def function(self):
-    #     return self.function
-    #
-    # @function.setter
-    # def function(self, function, arguments=None, target=None):
-    #     self.function = function
-    #     self.arguments = arguments
-    #     if issubclass(target, Element):
-    #         Element.add_function(function, arguments, self.name, target)
-    #     else:
-    #         Element.add_function(function, arguments, self.name)
 
     def click(self, *args, **kwargs):
         return None
@@ -229,16 +184,26 @@ class Element(pygame.Surface):
 
     class StoredFunction:
 
-        def __init__(self, path, module, function, target, *args, **kwargs):
+        # TODO: may need to change some things to access static methods from other classes easier
+
+        def __init__(self, path, module, function, target, parent, *args, **kwargs):
             self.path = path  # directory this function is found in
             self.module = module  # module this function is found in
             self.function = function
 
             self.target = target  # target of the function by name
+            self.parent = parent
             self.args = args
             self.kwargs = kwargs
 
-            self.stored_function = getattr(self.import_module(), self.function)
+            #  if there is a target, the stored function should be a reference to that instance of the function
+            if self.target:
+                self.object_reference = self.find_target(self.parent.get_instances())
+                self.stored_function = getattr(self.object_reference, self.function)
+
+            #  if there is no target, then the function is just part of a module
+            else:
+                self.stored_function = getattr(self.import_module(), self.function)
 
         def __call__(self, *args, **kwargs):
             if args or kwargs:
@@ -247,37 +212,21 @@ class Element(pygame.Surface):
                 print("no args given")
                 return self.stored_function(*self.args, **self.kwargs)
 
+        def find_target(self, instances):
+            # Users should have their classes they want referenced inheriting from
+            # guipyg.utils.utils.Instance
+
+            for instance in instances:
+                if self.target == instance.name:
+                    target_obj = instance
+                    return target_obj
+
         def import_module(self):
             importlib.invalidate_caches()
             if self.path:
                 return importlib.import_module(self.module, self.path)
             else:
                 return importlib.import_module(self.module)
-
-        class FunctionEncoder(JSONEncoder):
-
-            def default(self, o):
-                return o.__dict__  #  TODO: need to implement proper functionality by building a function object here
-
-
-# class ElementFunction(object):
-
-# def __init__(self, function=None, target=None):
-#     self.function = function
-#     self.target = target
-#
-# def __call__(self, *args, **kwargs):
-#     return self.function(*args, **kwargs)
-
-# decorator probably won't work as I need to be able to make several instances of a button
-# def element_function(function):
-#     @wraps(function)
-#     def wrapper(*args, **kwargs):
-#         result = function(*args, **kwargs)
-#
-#         return result()
-#
-#     return wrapper
 
 
 class ElementEncoder(JSONEncoder):
