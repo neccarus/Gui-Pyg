@@ -54,24 +54,30 @@ class Basic(Instance):
     def instance_method(self, *_, **__):
         print("This method was called from a class outside of the Element inheritance")
 
+    @staticmethod
+    def static_method(*_, **__):
+        print("This is a static method")
+
 
 basic = Basic('basic')
 
 gui_create_timer_start = datetime.now()
 
 button_one = Button(200, 50, 10, 50, name="Button One", msg="Click Me!", color=(150, 150, 150))
-button_one.function = button_one.StoredFunction("", "__main__", "clicker", None, button_one)
+button_one.function = button_one.StoredFunction("", "__main__", "clicker", None, None, button_one)
 button_two = Button(200, 50, 10, 110, name="Button Two", msg="Click Me!", color=(150, 150, 150))
-button_two.function = button_two.StoredFunction("", "__main__", "instance_method", 'basic', button_two)
+button_two.function = button_two.StoredFunction("", "__main__", "instance_method", None, 'basic', button_two)
 text_box = TextBox(200, 200, 10, 170, "Text")
 my_menu = Menu(400, 400, 50, 50, "Menu One", color=(50, 50, 50), elements=[button_one, button_two, text_box], is_visible=False)
 button_three = Button(200, 50, 10, 30, name="Button 3", msg="Toggle Visibility", color=(150, 150, 150))
-button_three.function = button_three.StoredFunction("guipyg.gui_element", ".element", "toggle_visibility", "Menu One", button_three)
-my_menu_two = Menu(250, 200, 500, 50, "Menu Two", color=(50, 50, 50), elements=[button_three])
+button_three.function = button_three.StoredFunction("guipyg.gui_element", ".element", "toggle_visibility", None, "Menu One", button_three)
+button_five = Button(200, 50, 10, 85, name="Button 5", msg="Static Method")
+button_five.function = button_three.StoredFunction("", "__main__", "static_method", "Basic", None, button_five)
+my_menu_two = Menu(250, 200, 500, 50, "Menu Two", color=(50, 50, 50), elements=[button_three, button_five])
 button_four = Button(150, 50, 10, 50, name="Button 4", msg="Swap Theme", color=(150, 150, 150))
 my_menu_three = Menu(200, 150, 400, 200, "Menu Three", (50, 50, 50), elements=[button_four])
 my_gui = GUI(1280, 720, 0, 0, theme="my_theme", name="My Gui")
-button_four.function = button_four.StoredFunction("", "__main__", "swap_theme", None, button_four)
+button_four.function = button_four.StoredFunction("", "__main__", "swap_theme", None, None, button_four)
 my_gui.elements.extend([my_menu, my_menu_two, my_menu_three])
 my_gui.apply_theme()
 

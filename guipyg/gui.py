@@ -121,7 +121,7 @@ class GUI(ElementGroup):
             self.selected_element = None
             self.dragging = None
 
-    def activate_selected(self, mouse_pos, *args, **kwargs): # TODO: This should be changed to enable keyboard shortcuts to access the functions of any elements
+    def activate_selected(self, mouse_pos, *args, **kwargs):  # TODO: This should be changed to enable keyboard shortcuts to access the functions of any elements
         if self.selected_element:
             self.selected_element.click(mouse_pos, *args, **kwargs)
             self.need_update = True
@@ -132,7 +132,9 @@ class GUIEncoder(JSONEncoder):
     def default(self, o):
         if hasattr(o, "function"):
             if o.function:
-                o.function = {'path': o.function.path, 'module': o.function.module, 'function': o.function.function, 'target': o.function.target, 'parent': o.function.parent.name}
+                o.function = {'path': o.function.path, 'module': o.function.module,
+                              'function': o.function.function, 'baseclass': o.function.baseclass,
+                              'target': o.function.target, 'parent': o.function.parent.name}
                 # o.function = o.function.__dict__
                 #  path, module, function, target, parent
         if hasattr(o, "elements_to_update"):
@@ -188,14 +190,14 @@ def load_gui(file):
     return gui
 
 
-def update_element_functions(gui):
-    #  TODO: this function shouldn't exist with properly implemented encoder for 'StoredFunction' class
-    if hasattr(gui, "elements"):
-        for index, element in enumerate(gui.elements):
-            if hasattr(element, "elements"):
-                update_element_functions(element)
-            if hasattr(element, "function"):
-                element.function = functions[element.function.__name__]
+# def update_element_functions(gui):
+#     #  TODO: this function shouldn't exist with properly implemented encoder for 'StoredFunction' class
+#     if hasattr(gui, "elements"):
+#         for index, element in enumerate(gui.elements):
+#             if hasattr(element, "elements"):
+#                 update_element_functions(element)
+#             if hasattr(element, "function"):
+#                 element.function = functions[element.function.__name__]
 
 
 def decode_gui(gui):

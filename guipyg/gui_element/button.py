@@ -20,11 +20,12 @@ class Button(ToggleableElement):
                 self.pos_y <= mouse_pos_y <= (self.pos_y + self.height):
             self.toggle_click()
 
-    def click(self, mouse_pos=(0, 0), *args, **kwargs):  # TODO: this method needs to be restructured in some way
-        self.get_click(mouse_pos)
+    def click(self, *args, **kwargs):  # TODO: this method needs to be restructured in some way
+        self.get_click(args[0])
         if self.toggle:
             self.toggle_click()
-            return self.function(*args, **kwargs)
+            #  slice first arg off since it was used as the mouse position for 'get_click' method
+            return self.function(*args[1:], **kwargs)
 
     def draw_text(self, surface):
         text_obj = self.font.render(self.msg, 1, self.font_color)

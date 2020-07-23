@@ -3,7 +3,6 @@ import json
 from json import JSONEncoder
 from guipyg.gui_style.style_item import style_dict
 from guipyg.utils.utils import Instance
-from functools import wraps
 import importlib
 
 
@@ -101,7 +100,7 @@ class Element(pygame.Surface, Instance):
         self.is_draggable = False
         self.drag_toggle = False
         self.set_style()
-        self.need_update = True  # hopefully will reduce calls to blit and fill
+        self.need_update = True
         self.has_drop_shadow = False
         self.drop_shadow_right = 0
         self.drop_shadow_left = 0
@@ -186,24 +185,28 @@ class Element(pygame.Surface, Instance):
 
         # TODO: may need to change some things to access static methods from other classes easier
 
-        def __init__(self, path, module, function, target, parent, *args, **kwargs):
+        def __init__(self, path, module, function, baseclass, target, parent, *args, **kwargs):
             self.path = path  # directory this function is found in
             self.module = module  # module this function is found in
             self.function = function
-
+            self.baseclass = baseclass  # baseclass is used when referencing static methods
             self.target = target  # target of the function by name
             self.parent = parent
             self.args = args
             self.kwargs = kwargs
 
             #  if there is a target, the stored function should be a reference to that instance of the function
+            #  this also means it is not a static method
             if self.target:
                 self.object_reference = self.find_target(self.parent.get_instances())
                 self.stored_function = getattr(self.object_reference, self.function)
 
-            #  if there is no target, then the function is just part of a module
+            #  if there is no target, then the function is just part of a module, but it could be a static method
             else:
-                self.stored_function = getattr(self.import_module(), self.function)
+                if self.baseclass:
+                    self.stored_function = getattr(self.import_static(), self.function)
+                else:
+                    self.stored_function = getattr(self.import_module(), self.function)
 
         def __call__(self, *args, **kwargs):
             if args or kwargs:
@@ -227,6 +230,12 @@ class Element(pygame.Surface, Instance):
                 return importlib.import_module(self.module, self.path)
             else:
                 return importlib.import_module(self.module)
+
+        def import_static(self):
+            module = self.import_module()
+            if self.baseclass in dir(module):
+                return getattr(module, self.baseclass)
+
 
 
 class ElementEncoder(JSONEncoder):
