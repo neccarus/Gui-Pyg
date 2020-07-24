@@ -3,6 +3,8 @@ import weakref
 
 class Instance:
 
+    #  Code Credit: http://effbot.org/pyfaq/how-do-i-get-a-list-of-all-instances-of-a-given-class.htm
+
     _instances = set()
 
     def add_instance(self):

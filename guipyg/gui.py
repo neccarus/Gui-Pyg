@@ -6,10 +6,11 @@ from .gui_element.element import Element
 from .gui_element.toggleable_element import ToggleableElement
 from .gui_element.popup import Popup
 from .gui_element.element_group import ElementGroup
-from .gui_element.textbox import TextBox
+from .gui_element.text_elements import TextBox
 from .gui_element.menu import Menu
 from .gui_style.style_item import theme_dict
 
+#  TODO: there is probably a better way to store and retrieve these
 class_types = {"Element": Element, "Button": Button, "Popup": Popup, "ToggleableElement": ToggleableElement,
                "ElementGroup": ElementGroup, "Menu": Menu, "TextBox": TextBox}
 
@@ -24,7 +25,7 @@ class GUI(ElementGroup):
         super().__init__(width, height, pos_x, pos_y, name, msg, elements=elements)
         self.pos_x = pos_x
         self.pos_y = pos_y
-        self.set_colorkey((0, 0, 0)) # TODO: should not be hardcoded
+        self.set_colorkey((0, 0, 0))  # TODO: should not be hardcoded
         self.elements = elements
         self.elements_to_update = self.elements
         self.theme = theme  # receives a Theme object from style module, used to stylize all elements
@@ -38,13 +39,13 @@ class GUI(ElementGroup):
     def apply_theme(self):
         if self.theme:
             for theme in theme_dict:
-                # print(theme)
                 if self.theme == theme_dict[theme].theme_name:
                     print(f"found theme {theme}")
                     theme_dict[theme].style_gui(self)
                     self.elements_to_update = self.elements
                     for element in self.elements:
                         element.need_update = True
+                        #  TODO: need to take into account inner elements that may have more elements
                         if hasattr(element, "elements"):
                             for inner_element in element.elements:
                                 inner_element.need_update = True
@@ -80,12 +81,12 @@ class GUI(ElementGroup):
         if self.need_update and self.is_active:
             self.fill((0, 0, 0))
             self.set_clip_area()
-            # self.draw_drop_shadows()
+            # self.draw_drop_shadows(self)
             self.fill_elements(screen)
             self.draw_text_to_elements()
             self.draw_element_border()
             self.blit_elements()
-        screen.blit(self, (0, 0))
+        screen.blit(self, (self.pos_x, self.pos_y))
         self.need_update = False
 
     def select_element(self, mouse_pos):
@@ -95,8 +96,7 @@ class GUI(ElementGroup):
                 if element.is_visible and element.is_draggable and \
                         element.rect.collidepoint(element.get_mouse_pos(mouse_pos)):
                     element.drag_toggle = True
-                    self.selected_element = element  # .drag_element(mouse_pos, datetime.now())
-                    # if element.is_draggable:
+                    self.selected_element = element
                     self.dragging = self.selected_element.drag_element(mouse_pos)
                     self.bring_element_to_front(element)
                     break
@@ -132,11 +132,10 @@ class GUIEncoder(JSONEncoder):
     def default(self, o):
         if hasattr(o, "function"):
             if o.function:
+                #  TODO: this method should be tidied up a bit
                 o.function = {'path': o.function.path, 'module': o.function.module,
                               'function': o.function.function, 'baseclass': o.function.baseclass,
                               'target': o.function.target, 'parent': o.function.parent.name}
-                # o.function = o.function.__dict__
-                #  path, module, function, target, parent
         if hasattr(o, "elements_to_update"):
             # o.elements_to_update = None
             del o.elements_to_update
@@ -147,7 +146,8 @@ class GUIEncoder(JSONEncoder):
 
 
 def encode_gui(gui):
-    return json.dumps(gui, skipkeys=True, cls=GUIEncoder, indent=4)
+    #  removed indent to reduce json file size (by quite a bit)
+    return json.dumps(gui, skipkeys=True, cls=GUIEncoder)
 
 
 def save_gui(gui, file):
@@ -163,8 +163,6 @@ def decode_element(element, cls=Element, class_types=None):
     else:
         element_obj = cls(**element)
         if hasattr(element_obj, "function") and element_obj.function:
-            #  TODO: need a decode_function method
-            # element_obj.function = element_obj.StoredFunction(**element_obj.function)
             element_obj.function = decode_function(element_obj.function, element_obj)
         if hasattr(element_obj, "elements"):
             for index, element in enumerate(element_obj.elements):
@@ -188,16 +186,6 @@ def load_gui(file):
     gui = decode_gui(gui_json)
     gui.apply_theme()
     return gui
-
-
-# def update_element_functions(gui):
-#     #  TODO: this function shouldn't exist with properly implemented encoder for 'StoredFunction' class
-#     if hasattr(gui, "elements"):
-#         for index, element in enumerate(gui.elements):
-#             if hasattr(element, "elements"):
-#                 update_element_functions(element)
-#             if hasattr(element, "function"):
-#                 element.function = functions[element.function.__name__]
 
 
 def decode_gui(gui):

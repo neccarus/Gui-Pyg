@@ -16,13 +16,13 @@ class Style(object):
         self.border_thickness = 0
         self.border_color = (0, 0, 0)
         self.corner_rounding = 0
-        self.has_drop_shadow = False
-        self.drop_shadow_top = 0
-        self.drop_shadow_bottom = 0
-        self.drop_shadow_left = 0
-        self.drop_shadow_right = 0
-        self.drop_shadow_color = (0, 0, 0)
-        self.drop_shadow_alpha = 0
+        # self.has_drop_shadow = False
+        # self.drop_shadow_top = 0
+        # self.drop_shadow_bottom = 0
+        # self.drop_shadow_left = 0
+        # self.drop_shadow_right = 0
+        # self.drop_shadow_color = (0, 0, 0)
+        # self.drop_shadow_alpha = 0
 
     def style_element(self, element):
         element.margin_left, element.margin_right = self.margin_left, self.margin_right
@@ -33,13 +33,13 @@ class Style(object):
         element.border_thickness = self.border_thickness
         element.border_color = self.border_color
         element.corner_rounding = self.corner_rounding
-        element.has_drop_shadow = self.has_drop_shadow
-        element.drop_shadow_top = self.drop_shadow_top
-        element.drop_shadow_bottom = self.drop_shadow_bottom
-        element.drop_shadow_left = self.drop_shadow_left
-        element.drop_shadow_right = self.drop_shadow_right
-        element.drop_shadow_color = self.drop_shadow_color
-        element.drop_shadow_alpha = self.drop_shadow_alpha
+        # element.has_drop_shadow = self.has_drop_shadow
+        # element.drop_shadow_top = self.drop_shadow_top
+        # element.drop_shadow_bottom = self.drop_shadow_bottom
+        # element.drop_shadow_left = self.drop_shadow_left
+        # element.drop_shadow_right = self.drop_shadow_right
+        # element.drop_shadow_color = self.drop_shadow_color
+        # element.drop_shadow_alpha = self.drop_shadow_alpha
         element.rect = element.get_rect()
         element.fill((0, 0, 0), element.rect) # fill element before changing dimensions to avoid anomalies
         element.rect.width -= abs((element.border_thickness % 2) - 1) # TODO: this should probably be an Element side method
@@ -52,7 +52,7 @@ class Style(object):
         if element.class_name == "TextBox":
             element.get_text_box()
         element.content_surface.set_colorkey(element.color)
-        element.set_drop_shadow()
+        # element.set_drop_shadow()
 
 class FontStyle(Style):
 

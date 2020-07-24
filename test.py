@@ -1,17 +1,19 @@
+from datetime import datetime
 import pygame
 import sys
 import json
 from guipyg import gui
-from datetime import datetime
-# from guipyg import create_gui
 from guipyg.gui import GUI
 from guipyg.gui_element.button import Button
 from guipyg.gui_element.menu import Menu
-from guipyg.gui_element.textbox import TextBox
+from guipyg.gui_element.text_elements import TextBox, Label
 from guipyg.gui_element.element import Element
 import os
 from guipyg.gui_style.style_item import theme_dict
 from guipyg.utils.utils import Instance
+
+
+startup_timer = datetime.now()
 
 os.environ['SDL_VIDEO_CENTERED'] = '1'
 
@@ -37,6 +39,12 @@ def display_fps(fps, surface):
     surface.blit(text_obj, text_rect)
 
 
+def update_fps_object(text_obj, fps):
+    text_obj.text = fps
+    text_obj.update_text_box()
+    text_obj.need_update = True
+
+
 def swap_theme(gui_obj, themes):
     for theme in themes:
         if theme != gui_obj.theme:
@@ -57,6 +65,7 @@ class Basic(Instance):
     @staticmethod
     def static_method(*_, **__):
         print("This is a static method")
+
 
 
 basic = Basic('basic')
@@ -96,7 +105,7 @@ gui_create_timer_end = datetime.now()
 
 print(f"It took {(gui_create_timer_end - gui_create_timer_start).total_seconds()} seconds to save the GUI to a file.")
 del my_gui
-del button_one, button_two, button_three, button_four, my_menu, my_menu_two, my_menu_three, text_box
+del button_one, button_two, button_three, button_four, my_menu, my_menu_two, my_menu_three, text_box, button_five
 
 # gui.GUI.deactivate_element(my_gui)
 
@@ -105,9 +114,15 @@ gui_create_timer_start = datetime.now()
 my_gui = gui.load_gui("gui_file.json")
 
 gui_create_timer_end = datetime.now()
+fps_gui = GUI(120, 40, 10, 10, color=(0, 0, 0), name="FPS GUI")
+fps_counter = Label("", "", 120, 40, 0, 0, name="FPS Counter", msg="", color=(0, 0, 0), font_color=(25, 255, 25))
+fps_gui.elements.append(fps_counter)
+fps_counter.is_draggable = True
+startup_timer_end = datetime.now()
 
 
 print(f"It took {(gui_create_timer_end - gui_create_timer_start).total_seconds()} seconds to load the GUI from a file.")
+print(f"It took {(startup_timer_end - startup_timer).total_seconds()} seconds to start the application.")
 
 clock = pygame.time.Clock()
 while True:
@@ -135,8 +150,16 @@ while True:
 
     my_gui.drag_selected()
 
+    #  TODO: this is a lot of work to get a dynamic text object updating every frame
+    update_fps_object(fps_counter, (str(round(clock.get_fps(), 1))))
+    fps_gui.need_update = True
+    fps_gui.elements_to_update = [fps_counter]
+    fps_gui.update(screen)
+
     my_gui.update(screen)
-    display_fps(str(round(clock.get_fps(), 1)), screen)
+
+    # display_fps(str(round(clock.get_fps(), 1)), screen)
+
     pygame.display.update(my_gui.clip_rect)
     # pygame.display.update()
     screen.fill((80, 80, 80))

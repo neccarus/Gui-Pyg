@@ -2,13 +2,42 @@ from .element import Element
 import pygame
 
 
+class TextElement(Element):
+
+    def __init__(self, text="", default_text="Text", *args, **kwargs):
+        self.text = text
+        self.default_text = default_text
+        super().__init__(*args, **kwargs)
+        self.set_colorkey(self.color)
+        self.update_text_box()
+
+    def update_text_box(self):
+        self.text_obj = self.font.render(self.text, False, self.font_color)
+        self.text_rect = self.text_obj.get_rect()
+        self.text_rect.topleft = (self.font_pos_x, self.font_pos_y)
+
+    def draw_text_to_elements(self):
+        # if self.need_update:
+        self.draw_text(self.content_surface)
+
+    def draw_text(self, surface):
+        self.content_surface.fill(self.color, self.content_rect)
+        surface.blit(self.text_obj, self.text_rect)
+
+
+class Label(TextElement):
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+
+
 class TextBox(Element): # TODO: this class might serve better as an element group containing 2 elements, Title and TextBox
 
     def __init__(self, width=0, height=0, pos_x=0, pos_y=0, name="Element", msg="", color=(245, 245, 245),
                  style="default", is_visible=True, font_color=(10, 10, 10), mutable=True, text="",
-                 default_text="Please type here...", **_):
+                 default_text="Please type here...", **kwargs):
         self.text_gap = 2
-        super().__init__(width, height, pos_x, pos_y, name, msg, color, style, is_visible, font_color, **_)
+        super().__init__(width, height, pos_x, pos_y, name, msg, color, style, is_visible, font_color, **kwargs)
         self.mutable = mutable
         self.default_text = default_text
         if text == "" and self.mutable:
@@ -21,8 +50,10 @@ class TextBox(Element): # TODO: this class might serve better as an element grou
     def get_text_box(self):
         self.text_rect = pygame.Rect((self.margin_left + self.border_thickness,
                                       self.margin_top + self.font.get_ascent() + self.border_thickness + self.text_gap),
-                                     (self.width - (self.margin_right + self.margin_left + self.border_thickness + self.corner_rounding),
-                                      self.height - self.margin_bottom - self.border_thickness - self.font.get_height()))
+                                     (self.width - (self.margin_right + self.margin_left +
+                                                    self.border_thickness + self.corner_rounding),
+                                      self.height - self.margin_bottom -
+                                      self.border_thickness - self.font.get_height()))
         self.text_surface = pygame.Surface((abs(self.text_rect.width), abs(self.text_rect.height)))
 
     def fill_elements(self, surface):

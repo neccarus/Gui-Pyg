@@ -12,7 +12,7 @@ class Element(pygame.Surface, Instance):
     _element_dict = {}
 
     _active_elements = []  # list all active elements
-    # TODO: need to make use of active_elements
+    # TODO: need to make use of active_elements or remove it
 
     @classmethod
     def my_name(cls):
@@ -43,16 +43,16 @@ class Element(pygame.Surface, Instance):
             if self.style == style_dict[style].style_name:
                 style_dict[style].style_element(self)
 
-    def set_drop_shadow(self):
-        self.drop_shadow_thickness = (max(self.drop_shadow_left, self.drop_shadow_right,
-                                          self.drop_shadow_top, self.drop_shadow_bottom)
-                                      + self.corner_rounding)
-        self.drop_shadow_rect = pygame.Rect(0,
-                                            0,
-                                            self.width + self.drop_shadow_right + self.drop_shadow_left,
-                                            self.height + self.drop_shadow_bottom + self.drop_shadow_top)
-        # self.drop_shadow_rect.center = self.pos_x + (self.width // 2), self.pos_y + (self.height // 2)
-        self.drop_shadow_rect.center = self.rect.center
+    # def set_drop_shadow(self):
+    #     self.drop_shadow_thickness = (max(self.drop_shadow_left, self.drop_shadow_right,
+    #                                       self.drop_shadow_top, self.drop_shadow_bottom)
+    #                                   + self.corner_rounding)
+    #     self.drop_shadow_rect = pygame.Rect(0, 0,
+    #                                         self.width + self.drop_shadow_right + self.drop_shadow_left,
+    #                                         self.height + self.drop_shadow_bottom + self.drop_shadow_top)
+    #
+    #     self.drop_shadow_rect.center = self.pos_x + (self.width // 2), self.pos_y + (self.height // 2)
+        # self.drop_shadow_rect.center = self.rect.center
 
     def __init__(self, width=0, height=0, pos_x=0, pos_y=0, name="Element", msg="", color=(255, 255, 255), style="default",
                  is_visible=True, font_color=(10, 10, 10), **_):
@@ -101,20 +101,28 @@ class Element(pygame.Surface, Instance):
         self.drag_toggle = False
         self.set_style()
         self.need_update = True
-        self.has_drop_shadow = False
-        self.drop_shadow_right = 0
-        self.drop_shadow_left = 0
-        self.drop_shadow_top = 0
-        self.drop_shadow_bottom = 0
-        self.drop_shadow_thickness = 0
-        self.drop_shadow_alpha = 255
-        self.drop_shadow_color = (0, 0, 0, self.drop_shadow_alpha)
-        self.drop_shadow_rect = pygame.Rect(self.pos_x - self.drop_shadow_left,
-                                            self.pos_y - self.drop_shadow_top,
-                                            self.width + self.drop_shadow_right,
-                                            self.height + self.drop_shadow_bottom)
-        self.drop_shadow_position = self.rect.center # TODO: needs to be in relation to the element's parent, not the elements itself
-        self.set_drop_shadow()
+
+        #  'parent' and 'children' attributes could be used for rendering efficiency?
+        self.parent = None
+        self.children = []
+
+        #  TODO: should rethink drop shadow code, may do it as a class inside of 'Element'
+        # self.has_drop_shadow = False
+        # self.drop_shadow_right = 0
+        # self.drop_shadow_left = 0
+        # self.drop_shadow_top = 0
+        # self.drop_shadow_bottom = 0
+        # self.drop_shadow_thickness = 0
+        # self.drop_shadow_alpha = 255
+        # self.drop_shadow_color = (0, 0, 0, self.drop_shadow_alpha)
+        # self.drop_shadow_rect = pygame.Rect(self.pos_x - self.drop_shadow_left,
+        #                                     self.pos_y - self.drop_shadow_top,
+        #                                     self.width + self.drop_shadow_right,
+        #                                     self.height + self.drop_shadow_bottom)
+        # self.drop_shadow_surface = pygame.Surface((self.width + self.drop_shadow_right + self.drop_shadow_left,
+        #                                            self.height + self.drop_shadow_bottom + self.drop_shadow_top))
+        # self.drop_shadow_position = self.rect.center # TODO: needs to be in relation to the element's parent, not the elements itself
+        # self.set_drop_shadow()
         self.is_active = True
         # Element.activate_element(self)
         # print(f"{self.my_name()}: {self.id_}")
@@ -140,6 +148,8 @@ class Element(pygame.Surface, Instance):
 
     def fill_elements(self, surface):
         if self.need_update:
+            # self.set_drop_shadow()
+            # self.draw_drop_shadow()
             if not self.corner_rounding:
                 self.fill(self.color, self.rect)
                 self.content_surface.fill(self.color, self.content_rect)
@@ -148,6 +158,18 @@ class Element(pygame.Surface, Instance):
                 pygame.draw.rect(self, self.color, self.rect, border_radius=self.corner_rounding)
                 pygame.draw.rect(self.content_surface, self.color, self.content_rect,
                                  border_radius=self.corner_rounding)
+
+    # def draw_drop_shadow(self):
+    #     if self.need_update:
+    #         if not self.corner_rounding:
+    #             self.drop_shadow_surface.fill(self.drop_shadow_color, self.drop_shadow_rect)
+    #
+    #         elif self.corner_rounding:
+    #             pygame.draw.rect(self, self.drop_shadow_color, self.drop_shadow_rect, border_radius=self.corner_rounding)
+
+    # def blit_drop_shadow(self, surface):
+    #     if self.need_update and self.has_drop_shadow:
+    #         surface.blit(self.drop_shadow_surface, self.drop_shadow_rect.topleft)
 
     def blit_elements(self):
         if self.need_update:
@@ -183,13 +205,12 @@ class Element(pygame.Surface, Instance):
 
     class StoredFunction:
 
-        # TODO: may need to change some things to access static methods from other classes easier
-
         def __init__(self, path, module, function, baseclass, target, parent, *args, **kwargs):
             self.path = path  # directory this function is found in
             self.module = module  # module this function is found in
             self.function = function
-            self.baseclass = baseclass  # baseclass is used when referencing static methods
+            self.baseclass = baseclass  # baseclass is used when referencing static methods, a class within the module
+            #  TODO: should find a better way to reference other object's than using their name, may need to make a simple baseclass for other classes to inherit from
             self.target = target  # target of the function by name
             self.parent = parent
             self.args = args
@@ -237,7 +258,6 @@ class Element(pygame.Surface, Instance):
                 return getattr(module, self.baseclass)
 
 
-
 class ElementEncoder(JSONEncoder):
 
     def default(self, o):
@@ -247,4 +267,4 @@ class ElementEncoder(JSONEncoder):
 
 
 def encode_element(element):
-    return json.dumps(element, cls=ElementEncoder, indent=1)
+    return json.dumps(element, cls=ElementEncoder)

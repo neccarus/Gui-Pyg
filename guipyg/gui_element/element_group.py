@@ -1,5 +1,4 @@
 from .element import Element
-import pygame
 
 
 class ElementGroup(Element):
@@ -26,21 +25,21 @@ class ElementGroup(Element):
         self.is_draggable = True
         self.blit_list = []  # used to implement pygame.blits()
 
-    def draw_drop_shadows(self, surface):
-        # for element in self.elements:
-        if self.is_visible:
-            # if hasattr(self, "elements"):
-            #     self.draw_drop_shadows()
-            if self.has_drop_shadow:
-                pygame.draw.rect(surface,
-                                 self.drop_shadow_color,
-                                 self.drop_shadow_rect,
-                                 self.drop_shadow_thickness,
-                                 self.corner_rounding)
+    # def draw_drop_shadows(self, surface):
+    #     # for element in self.elements:
+    #     if self.is_visible:
+    #         # if hasattr(self, "elements"):
+    #         #     self.draw_drop_shadows()
+    #         if self.has_drop_shadow:
+    #             pygame.draw.rect(surface,
+    #                              self.drop_shadow_color,
+    #                              self.drop_shadow_rect,
+    #                              self.drop_shadow_thickness,
+    #                              self.corner_rounding)
 
     def fill_elements(self, surface):
         for element in self.elements:
-            self.draw_drop_shadows(surface)
+            # self.draw_drop_shadows(surface)
             element.fill_elements(surface)
         if self.need_update:  # if statement down here since we want to check individual elements for changes
             super().fill_elements(surface)
@@ -65,6 +64,7 @@ class ElementGroup(Element):
         if self.is_visible:
             for element in self.elements:
                 if element.is_visible:
+                    # element.blit_drop_shadow(self)
                     element.blit_elements()
                     self.blit_list.append((element, (element.pos_x, element.pos_y)))
             if self.need_update:
