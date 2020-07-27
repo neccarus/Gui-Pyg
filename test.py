@@ -12,6 +12,8 @@ import os
 from guipyg.gui_style.style_item import theme_dict
 from guipyg.utils.utils import Instance
 
+if os.name == 'posix':
+    os.environ['SDL_AUDIODRIVER'] = 'dsp'
 
 startup_timer = datetime.now()
 
