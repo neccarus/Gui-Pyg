@@ -34,7 +34,7 @@ class Label(TextElement):
 class TextBox(Element): # TODO: this class might serve better as an element group containing 2 elements, Title and TextBox
 
     def __init__(self, width=0, height=0, pos_x=0, pos_y=0, name="Element", msg="", color=(245, 245, 245),
-                 style="default", is_visible=True, font_color=(10, 10, 10), mutable=True, text="",
+                 style=None, is_visible=True, font_color=(10, 10, 10), mutable=True, text="",
                  default_text="Please type here...", **kwargs):
         self.text_gap = 2
         super().__init__(width, height, pos_x, pos_y, name, msg, color, style, is_visible, font_color, **kwargs)

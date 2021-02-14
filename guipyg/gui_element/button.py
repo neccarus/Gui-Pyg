@@ -5,10 +5,10 @@ class Button(ToggleableElement):
 
     def __init__(self, width=0, height=0, pos_x=0, pos_y=0, function=None,
                  name="Button", msg="", color=(255, 255, 255),
-                 style="default", is_visible=True, **_):
+                 style=None, is_visible=True, **kwargs):
         self.function = function
         super().__init__(width, height, pos_x, pos_y, name=name, msg=msg,
-                         color=color, style=style, is_visible=is_visible)
+                         color=color, style=style, is_visible=is_visible, **kwargs)
         self.font_pos_x, self.font_pos_y = self.rect.center
 
     def toggle_click(self):  # TODO: does this do anything? Does it need to be here?

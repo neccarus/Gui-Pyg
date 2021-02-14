@@ -17,12 +17,12 @@ class_types = {"Element": Element, "Button": Button, "Popup": Popup, "Toggleable
 
 class GUI(ElementGroup):
 
-    def __init__(self, width=0, height=0, pos_x=0, pos_y=0, name="GUI", msg="", elements=None, theme=None, *_, **__):
+    def __init__(self, width=0, height=0, pos_x=0, pos_y=0, name="GUI", msg="", elements=None, theme=None, hide_text=True, *_, **kwargs):
         if elements is None:
             elements = []
         self.width = width
         self.height = height
-        super().__init__(width, height, pos_x, pos_y, name, msg, elements=elements)
+        super().__init__(width, height, pos_x, pos_y, name, msg, elements=elements, hide_text=hide_text, **kwargs)
         self.pos_x = pos_x
         self.pos_y = pos_y
         self.set_colorkey((0, 0, 0))  # TODO: should not be hardcoded
@@ -43,13 +43,20 @@ class GUI(ElementGroup):
                     print(f"found theme {theme}")
                     theme_dict[theme].style_gui(self)
                     self.elements_to_update = self.elements
-                    for element in self.elements:
-                        element.need_update = True
-                        #  TODO: need to take into account inner elements that may have more elements
-                        if hasattr(element, "elements"):
-                            for inner_element in element.elements:
-                                inner_element.need_update = True
+                    self.apply_theme_to_elements(self.elements)
+                    # for element in self.elements:
+                    #     element.need_update = True
+                    #     #  TODO: need to take into account inner elements that may have more elements
+                    #     if hasattr(element, "elements"):
+                    #         for inner_element in element.elements:
+                    #             inner_element.need_update = True
                     break
+
+    def apply_theme_to_elements(self, elements):
+        for element in elements:
+            element.need_update = True
+            if hasattr(element, "elements"):
+                self.apply_theme_to_elements(element.elements)
 
     def bring_element_to_front(self, element):
         for index, elements in enumerate(self.elements):

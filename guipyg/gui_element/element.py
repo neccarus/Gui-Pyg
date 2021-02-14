@@ -54,8 +54,9 @@ class Element(pygame.Surface, Instance):
     #     self.drop_shadow_rect.center = self.pos_x + (self.width // 2), self.pos_y + (self.height // 2)
         # self.drop_shadow_rect.center = self.rect.center
 
-    def __init__(self, width=0, height=0, pos_x=0, pos_y=0, name="Element", msg="", color=(255, 255, 255), style="default",
-                 is_visible=True, font_color=(10, 10, 10), **_):
+    # TODO: all inherited classes need to make proper use of **kwargs instead of writing them in each and every __init__
+    def __init__(self, width=0, height=0, pos_x=0, pos_y=0, name="Element", msg="", color=(255, 255, 255), style=None,
+                 is_visible=True, font_color=(10, 10, 10), hide_text=False, **_):
         super().__init__((width, height), pygame.HWSURFACE)
         super().add_instance()
         Element.new_id(self)
@@ -71,7 +72,7 @@ class Element(pygame.Surface, Instance):
         self.is_visible = is_visible
         self.border_thickness = 1
         self.border_color = (1, 1, 1)
-        self.corner_rounding = None
+        self.corner_rounding = 0
         self.margin_top = 0
         self.margin_bottom = 0
         self.margin_left = 0
@@ -101,6 +102,9 @@ class Element(pygame.Surface, Instance):
         self.drag_toggle = False
         self.set_style()
         self.need_update = True
+
+        # hide text can be toggled, will prevent draw_text() from executing on this element
+        self.hide_text = hide_text
 
         #  'parent' and 'children' attributes could be used for rendering efficiency?
         self.parent = None
@@ -135,6 +139,12 @@ class Element(pygame.Surface, Instance):
         #Element.deactivate_element(self)
         if self in Element._element_dict:
             Element._element_dict.pop(self.name)
+
+    def toggle_hide_text(self, toggle_to):
+        if toggle_to:
+            self.hide_text = toggle_to
+        else:
+            self.hide_text = not self.hide_text
 
     def click(self, *args, **kwargs):
         return None
@@ -188,7 +198,8 @@ class Element(pygame.Surface, Instance):
             self.draw_text(self.content_surface)
 
     def draw_text(self, surface):
-        surface.blit(self.text_obj, self.text_rect)
+        if not self.hide_text:
+            surface.blit(self.text_obj, self.text_rect)
 
     def drag_element(self, mouse_pos=(0, 0)):
         mouse_pos_start = mouse_pos
@@ -210,7 +221,7 @@ class Element(pygame.Surface, Instance):
             self.module = module  # module this function is found in
             self.function = function
             self.baseclass = baseclass  # baseclass is used when referencing static methods, a class within the module
-            #  TODO: should find a better way to reference other object's than using their name, may need to make a simple baseclass for other classes to inherit from
+            # TODO: should find a better way to reference other object's than using their name, may need to make a simple baseclass for other classes to inherit from
             self.target = target  # target of the function by name
             self.parent = parent
             self.args = args
