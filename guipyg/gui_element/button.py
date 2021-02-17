@@ -25,7 +25,8 @@ class Button(ToggleableElement):
         if self.toggle:
             self.toggle_click()
             #  slice first arg off since it was used as the mouse position for 'get_click' method
-            return self.function(*args[1:], **kwargs)
+            # print(self.function.args + " " + self.function.kwargs)
+            return self.function(*self.function.args, **self.function.kwargs)
 
     def draw_text(self, surface):
         text_obj = self.font.render(self.msg, 1, self.font_color)

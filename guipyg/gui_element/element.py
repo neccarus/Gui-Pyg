@@ -4,6 +4,7 @@ from json import JSONEncoder
 from guipyg.gui_style.style_item import style_dict
 from guipyg.utils.utils import Instance
 import importlib
+import functools
 
 
 class Element(pygame.Surface, Instance):
@@ -216,7 +217,7 @@ class Element(pygame.Surface, Instance):
 
     class StoredFunction:
 
-        def __init__(self, path, module, function, baseclass, target, parent, *args, **kwargs):
+        def __init__(self, path="", module="", function=None, baseclass=None, target=None, parent=None, *args, **kwargs):
             self.path = path  # directory this function is found in
             self.module = module  # module this function is found in
             self.function = function
@@ -224,8 +225,17 @@ class Element(pygame.Surface, Instance):
             # TODO: should find a better way to reference other object's than using their name, may need to make a simple baseclass for other classes to inherit from
             self.target = target  # target of the function by name
             self.parent = parent
-            self.args = args
-            self.kwargs = kwargs
+            print(f"kwargs: {[*kwargs]}")
+            if args:
+                self.args = [*args]
+            else:
+                self.args = []
+
+            if kwargs:
+                self.kwargs = {**kwargs}
+                self.args += [*self.kwargs['args']]
+            else:
+                self.kwargs = {}
 
             #  if there is a target, the stored function should be a reference to that instance of the function
             #  this also means it is not a static method
@@ -236,16 +246,19 @@ class Element(pygame.Surface, Instance):
             #  if there is no target, then the function is just part of a module, but it could be a static method
             else:
                 if self.baseclass:
-                    self.stored_function = getattr(self.import_static(), self.function)
+                    self.stored_function = getattr(self.import_static(), str(self.function))
                 else:
-                    self.stored_function = getattr(self.import_module(), self.function)
+                    self.stored_function = getattr(self.import_module(), str(self.function))
 
+        # TODO: functions don't seem to be working from json files again
         def __call__(self, *args, **kwargs):
             if args or kwargs:
-                return self.stored_function(*args, **kwargs)
+                print(self.args)
+                print(*self.kwargs["args"])
+                return self.stored_function(*self.args, **self.kwargs)
             else:
                 print("no args given")
-                return self.stored_function(*self.args, **self.kwargs)
+                return self.stored_function(*args, **kwargs)
 
         def find_target(self, instances):
             # Users should have their classes they want referenced inheriting from
@@ -267,6 +280,24 @@ class Element(pygame.Surface, Instance):
             module = self.import_module()
             if self.baseclass in dir(module):
                 return getattr(module, self.baseclass)
+
+
+class ElementDecorators(object):
+
+    @classmethod
+    def toggle_visibility_wrapper(cls):
+        """Activates function parameter before self.toggle_visibility()"""
+        def wrapper(function):
+            @functools.wraps(function)
+            def wrapper_args(*args, **kwargs):
+                print(*args)
+                print(**kwargs)
+                return function(*args, **kwargs)
+
+            cls.toggle_visibility()
+            return wrapper_args
+
+        return wrapper
 
 
 class ElementEncoder(JSONEncoder):

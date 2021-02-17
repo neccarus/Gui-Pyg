@@ -17,16 +17,12 @@ class_types = {"Element": Element, "Button": Button, "Popup": Popup, "Toggleable
 
 class GUI(ElementGroup):
 
-    def __init__(self, width=0, height=0, pos_x=0, pos_y=0, name="GUI", msg="", elements=None, theme=None, hide_text=True, *_, **kwargs):
-        if elements is None:
-            elements = []
-        self.width = width
-        self.height = height
-        super().__init__(width, height, pos_x, pos_y, name, msg, elements=elements, hide_text=hide_text, **kwargs)
-        self.pos_x = pos_x
-        self.pos_y = pos_y
-        self.set_colorkey((0, 0, 0))  # TODO: should not be hardcoded
-        self.elements = elements
+    def __init__(self, *args, theme=None, color_key=(0, 0, 0), **kwargs):
+        # if elements is None:
+        self.elements = []
+        super().__init__(*args, **kwargs)
+        self.hide_text = True
+        self.set_colorkey(color_key)
         self.elements_to_update = self.elements
         self.theme = theme  # receives a Theme object from style module, used to stylize all elements
         self.need_update = True
@@ -40,17 +36,11 @@ class GUI(ElementGroup):
         if self.theme:
             for theme in theme_dict:
                 if self.theme == theme_dict[theme].theme_name:
-                    print(f"found theme {theme}")
+                    # print(f"found theme {theme}")
                     theme_dict[theme].style_gui(self)
                     self.elements_to_update = self.elements
                     self.apply_theme_to_elements(self.elements)
-                    # for element in self.elements:
-                    #     element.need_update = True
-                    #     #  TODO: need to take into account inner elements that may have more elements
-                    #     if hasattr(element, "elements"):
-                    #         for inner_element in element.elements:
-                    #             inner_element.need_update = True
-                    break
+                    # break
 
     def apply_theme_to_elements(self, elements):
         for element in elements:
@@ -108,7 +98,7 @@ class GUI(ElementGroup):
                     self.bring_element_to_front(element)
                     break
 
-    def drag_selected(self): # TODO: Figure out solution to drag elements from inside of other element_groups
+    def drag_selected(self):  # TODO: Figure out solution to drag elements from inside of other element_groups
         if self.selected_element:
             self.selected_element.pos_x, self.selected_element.pos_y = next(self.dragging)
             if self.selected_element.pos_x < 0:
@@ -132,6 +122,10 @@ class GUI(ElementGroup):
         if self.selected_element:
             self.selected_element.click(mouse_pos, *args, **kwargs)
             self.need_update = True
+            return True
+        else:
+            self.need_update = True
+            return False
 
 
 class GUIEncoder(JSONEncoder):
@@ -169,7 +163,9 @@ def decode_element(element, cls=Element, class_types=None):
         element_obj = cls(**element_decode)
     else:
         element_obj = cls(**element)
+        print(element_obj)
         if hasattr(element_obj, "function") and element_obj.function:
+            print(f"{element_obj} has a function")
             element_obj.function = decode_function(element_obj.function, element_obj)
         if hasattr(element_obj, "elements"):
             for index, element in enumerate(element_obj.elements):

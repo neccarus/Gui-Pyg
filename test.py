@@ -69,7 +69,6 @@ class Basic(Instance):
         print("This is a static method")
 
 
-
 basic = Basic('basic')
 
 gui_create_timer_start = datetime.now()
@@ -83,12 +82,12 @@ my_menu = Menu(400, 400, 50, 50, "Menu One", color=(50, 50, 50), elements=[butto
 button_three = Button(200, 50, 10, 30, name="Button 3", msg="Toggle Visibility", color=(150, 150, 150))
 button_three.function = button_three.StoredFunction("guipyg.gui_element", ".element", "toggle_visibility", None, "Menu One", button_three)
 button_five = Button(200, 50, 10, 85, name="Button 5", msg="Static Method")
-button_five.function = button_three.StoredFunction("", "__main__", "static_method", "Basic", None, button_five)
+button_five.function = button_five.StoredFunction("", "__main__", "static_method", "Basic", None, button_five)
 my_menu_two = Menu(250, 200, 500, 50, "Menu Two", color=(50, 50, 50), elements=[button_three, button_five])
 button_four = Button(150, 50, 10, 50, name="Button 4", msg="Swap Theme", color=(150, 150, 150))
 my_menu_three = Menu(200, 150, 400, 200, "Menu Three", (50, 50, 50), elements=[button_four])
 my_gui = GUI(1280, 720, 0, 0, theme="my_theme", name="My Gui")
-button_four.function = button_four.StoredFunction("", "__main__", "swap_theme", None, None, button_four)
+button_four.function = button_four.StoredFunction("", "__main__", "swap_theme", None, None, button_four, args=(my_gui, theme_dict))
 my_gui.elements.extend([my_menu, my_menu_two, my_menu_three])
 my_gui.apply_theme()
 
@@ -117,7 +116,7 @@ my_gui = gui.load_gui("gui_file.json")
 
 gui_create_timer_end = datetime.now()
 fps_gui = GUI(120, 40, 10, 10, color=(0, 0, 0), name="FPS GUI")
-fps_counter = Label("", "", 120, 40, 0, 0, name="FPS Counter", msg="", color=(0, 0, 0), font_color=(25, 255, 25))
+fps_counter = Label("", "", False, 120, 40, 0, 0, name="FPS Counter", msg="", color=(0, 0, 0), font_color=(25, 255, 25))
 fps_gui.elements.append(fps_counter)
 fps_counter.is_draggable = True
 startup_timer_end = datetime.now()

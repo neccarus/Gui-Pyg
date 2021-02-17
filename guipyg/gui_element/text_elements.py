@@ -4,15 +4,16 @@ import pygame
 
 class TextElement(Element):
 
-    def __init__(self, text="", default_text="Text", *args, **kwargs):
+    def __init__(self, text="", default_text="Text", antialias=False, *args, **kwargs):
         self.text = text
         self.default_text = default_text
+        self.antialias = antialias
         super().__init__(*args, **kwargs)
         self.set_colorkey(self.color)
         self.update_text_box()
 
     def update_text_box(self):
-        self.text_obj = self.font.render(self.text, False, self.font_color)
+        self.text_obj = self.font.render(self.text, self.antialias, self.font_color)
         self.text_rect = self.text_obj.get_rect()
         self.text_rect.topleft = (self.font_pos_x, self.font_pos_y)
 
@@ -33,11 +34,10 @@ class Label(TextElement):
 
 class TextBox(Element): # TODO: this class might serve better as an element group containing 2 elements, Title and TextBox
 
-    def __init__(self, width=0, height=0, pos_x=0, pos_y=0, name="Element", msg="", color=(245, 245, 245),
-                 style=None, is_visible=True, font_color=(10, 10, 10), mutable=True, text="",
+    def __init__(self, *args, mutable=True, text="",
                  default_text="Please type here...", **kwargs):
         self.text_gap = 2
-        super().__init__(width, height, pos_x, pos_y, name, msg, color, style, is_visible, font_color, **kwargs)
+        super().__init__(*args, **kwargs)
         self.mutable = mutable
         self.default_text = default_text
         if text == "" and self.mutable:
