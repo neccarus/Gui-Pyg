@@ -5,6 +5,7 @@ import pygame
 class Style(object):
 
     def __init__(self):
+        self.base_type = "Style"
         self.style_name = "default"
         self.margin_left = 0
         self.margin_right = 0
@@ -58,6 +59,7 @@ class FontStyle(Style):
 
     def __init__(self):
         super().__init__()
+        self.base_type = "FontStyle"
         self.font = "arial black"
         self.font_size = 14
         self.font_italic = False

@@ -60,6 +60,7 @@ class Element(pygame.Surface, Instance):
                  is_visible=True, font_color=(10, 10, 10), hide_text=False, **_):
         super().__init__((width, height), pygame.HWSURFACE)
         super().add_instance()
+        self.base_type = "Element"
         Element.new_id(self)
         self.width = width
         self.height = height
@@ -218,6 +219,7 @@ class Element(pygame.Surface, Instance):
     class StoredFunction:
 
         def __init__(self, path="", module="", function=None, baseclass=None, target=None, parent=None, *args, **kwargs):
+            self.base_type = "StoredFunction"
             self.path = path  # directory this function is found in
             self.module = module  # module this function is found in
             self.function = function
@@ -225,7 +227,7 @@ class Element(pygame.Surface, Instance):
             # TODO: should find a better way to reference other object's than using their name, may need to make a simple baseclass for other classes to inherit from
             self.target = target  # target of the function by name
             self.parent = parent
-            print(f"kwargs: {[*kwargs]}")
+            # print(f"kwargs: {[*kwargs]}")
             if args:
                 self.args = [*args]
             else:
@@ -234,13 +236,26 @@ class Element(pygame.Surface, Instance):
             if kwargs:
                 self.kwargs = {**kwargs}
                 self.args += [*self.kwargs['args']]
+                if "kwargs" in self.kwargs:
+                    self.kwargs.pop('kwargs')
             else:
                 self.kwargs = {}
+
+            # for arg in [*self.args]:
+            #     print(f"comparing {arg} to {[*self.kwargs['args']]}")
+            #     if arg in [*self.kwargs["args"]]:
+            #         print(f"deleting {arg}")
+            #         self.kwargs.pop(arg)
+
+            if "args" in self.kwargs:
+                self.kwargs.pop("args")
+                print(f"args: {self.args} kwargs: {self.kwargs}")
 
             #  if there is a target, the stored function should be a reference to that instance of the function
             #  this also means it is not a static method
             if self.target:
                 self.object_reference = self.find_target(self.parent.get_instances())
+                print(self.object_reference.name)
                 self.stored_function = getattr(self.object_reference, self.function)
 
             #  if there is no target, then the function is just part of a module, but it could be a static method
@@ -253,8 +268,8 @@ class Element(pygame.Surface, Instance):
         # TODO: functions don't seem to be working from json files again
         def __call__(self, *args, **kwargs):
             if args or kwargs:
-                print(self.args)
-                print(*self.kwargs["args"])
+                # print(self.args)
+                # print(*self.kwargs["args"])
                 return self.stored_function(*self.args, **self.kwargs)
             else:
                 print("no args given")

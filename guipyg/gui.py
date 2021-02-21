@@ -73,7 +73,8 @@ class GUI(ElementGroup):
         self.clip_rect = pygame.Rect(left, top, right - left, bottom - top)
         self.set_clip(self.clip_rect)
 
-    def update(self, screen): # TODO: there must be a more efficient way to do this than have every function loop over every element
+    def update(self,
+               screen):  # TODO: there must be a more efficient way to do this than have every function loop over every element
         # screen to blit to
         if self.need_update and self.is_active:
             self.fill((0, 0, 0))
@@ -118,7 +119,8 @@ class GUI(ElementGroup):
             self.selected_element = None
             self.dragging = None
 
-    def activate_selected(self, mouse_pos, *args, **kwargs):  # TODO: This should be changed to enable keyboard shortcuts to access the functions of any elements
+    def activate_selected(self, mouse_pos, *args,
+                          **kwargs):  # TODO: This should be changed to enable keyboard shortcuts to access the functions of any elements
         if self.selected_element:
             self.selected_element.click(mouse_pos, *args, **kwargs)
             self.need_update = True
@@ -132,55 +134,124 @@ class GUIEncoder(JSONEncoder):
 
     def default(self, o):
         if hasattr(o, "function"):
-            if o.function:
-                #  TODO: this method should be tidied up a bit
-                o.function = {'path': o.function.path, 'module': o.function.module,
-                              'function': o.function.function, 'baseclass': o.function.baseclass,
-                              'target': o.function.target, 'parent': o.function.parent.name}
+            o.function = encode_function(o.function)
+            # print(o.function)
         if hasattr(o, "elements_to_update"):
             # o.elements_to_update = None
             del o.elements_to_update
         if hasattr(o, "__dict__"):
+            # print(o.__dict__)
             return o.__dict__
         else:
             pass
 
 
-def encode_gui(gui):
-    #  removed indent to reduce json file size (by quite a bit)
-    return json.dumps(gui, skipkeys=True, cls=GUIEncoder)
+def encode_function(function):
+    # if function:
+    # print(o.function)
+    #  TODO: this method should be tidied up a bit
+    encoded_function = {'path': function.path, 'module': function.module,
+                        'function': function.function, 'baseclass': function.baseclass,
+                        'target': function.target, 'parent': function.parent.name,
+                        'args': [],
+                        'kwargs': {}}
+    # print(function.args)
+    for arg in function.args:
+        if hasattr(arg, "base_type") and arg.base_type == "Element":
+            encoded_function['args'] += [arg.name]
+        else:
+            encoded_function['args'] += [arg]
+
+    for kwarg in function.kwargs:
+        if kwarg == 'arg' or kwarg == 'kwarg':
+            continue
+        if hasattr(kwarg, "base_type") and kwarg.base_type == "Element":
+            encoded_function['kwargs'] += {kwarg.dict}
+        else:
+            encoded_function['kwargs'] += {kwarg}
+    # print(encoded_function)
+    return encoded_function
+
+
+# def encode_gui(gui):
+#     #  removed indent to reduce json file size (by quite a bit)
+#     return json.dumps(gui, skipkeys=True, cls=GUIEncoder)
 
 
 def save_gui(gui, file):
     with open(file, 'w') as w:
-        json.dump(encode_gui(gui), w)
+        # json.dump(encode_gui(gui), w)
+        json.dump(gui, w, skipkeys=True, cls=GUIEncoder)  # , check_circular=False)
 
 
-def decode_element(element, cls=Element, class_types=None):
+def decode_element(element, gui, cls=Element, class_types=None):
     #  TODO: this should probably be in the 'element' module
     if type(element) != dict:
+        # print("Decode")
         element_decode = json.loads(element)
         element_obj = cls(**element_decode)
     else:
+        # print(element)
         element_obj = cls(**element)
-        print(element_obj)
-        if hasattr(element_obj, "function") and element_obj.function:
-            print(f"{element_obj} has a function")
-            element_obj.function = decode_function(element_obj.function, element_obj)
+        # print(element_obj.__dict__)
+
         if hasattr(element_obj, "elements"):
             for index, element in enumerate(element_obj.elements):
                 element_name = element["class_name"]
                 obj = decode_element(element, class_types[element_name])
+                print(obj.__dict__)
                 element_obj.elements[index] = obj
+        if hasattr(element_obj, "function") and element_obj.function:
+            print("has a function")
+            # element_obj.function = decode_function(element_obj.function, element_obj, gui)
+            decode_function(element_obj.function, element_obj, gui)
+        if element_obj.base_type == "StoredFunction":
+            decode_function(element_obj, gui)
 
+    # print(element_obj.__dict__)
     return element_obj
 
 
-def decode_function(function, element):
+def decode_function(function, gui):
+    # TODO: currently functions are either not being decoded, or aren't being attached to their respective elements
     if function['parent'] is not None:
-        function['parent'] = element
-    function_obj = element.StoredFunction(**function)
-    return function_obj
+        # function['parent'] = element
+
+        for arg in function.args:
+            for element in gui.elements:
+                new_arg = check_for_element(arg, element)
+                function['args'] += [new_arg]
+            print(function.args)
+        for element in gui.elements:
+            if function['parent'] == element.name:
+                function_obj = element.StoredFunction(**function)
+                print(function_obj.__dict__)
+        # return function_obj
+                element.function = function_obj
+
+# def decode_function(function, element, gui):
+#     if function['parent'] is not None:
+#         function['parent'] = element
+#
+#     for arg in function.args:
+#         for element in gui.elements:
+#             new_arg = check_for_element(arg, element)
+#             function['args'] += [new_arg]
+#         print(function.args)
+#     function_obj = element.StoredFunction(**function)
+#     print(function_obj.__dict__)
+#     # return function_obj
+#     element.function = function_obj
+
+
+def check_for_element(check_for, element):
+    if check_for in element:
+        return element
+    else:
+        if hasattr(element, "elements"):
+            check_for_element(check_for, element.elements)
+        else:
+            return check_for
 
 
 def load_gui(file):
@@ -192,12 +263,13 @@ def load_gui(file):
 
 
 def decode_gui(gui):
-    gui_decoded = json.loads(gui)
-    gui_obj = GUI(**gui_decoded)
+    # gui_decoded = json.loads(gui)
+    # gui_obj = GUI(**gui_decoded)
+    gui_obj = GUI(**gui)
 
     for index, element in enumerate(gui_obj.elements):
         element_name = element["class_name"]
-        obj = decode_element(element, class_types[element_name], class_types)
+        obj = decode_element(element, gui_obj, class_types[element_name], class_types)
         gui_obj.elements[index] = obj
 
     return gui_obj

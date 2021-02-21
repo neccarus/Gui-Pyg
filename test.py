@@ -87,7 +87,7 @@ my_menu_two = Menu(250, 200, 500, 50, "Menu Two", color=(50, 50, 50), elements=[
 button_four = Button(150, 50, 10, 50, name="Button 4", msg="Swap Theme", color=(150, 150, 150))
 my_menu_three = Menu(200, 150, 400, 200, "Menu Three", (50, 50, 50), elements=[button_four])
 my_gui = GUI(1280, 720, 0, 0, theme="my_theme", name="My Gui")
-button_four.function = button_four.StoredFunction("", "__main__", "swap_theme", None, None, button_four, args=(my_gui, theme_dict))
+button_four.function = button_four.StoredFunction("", "__main__", "swap_theme", None, None, parent=button_four, args=(my_gui, theme_dict))
 my_gui.elements.extend([my_menu, my_menu_two, my_menu_three])
 my_gui.apply_theme()
 
