@@ -10,3 +10,5 @@ guipyg/gui_element/__pycache__/
 guipyg/gui_style/__pycache__/
 
 *.pyc
+
+.idea/misc.xml
