@@ -3,7 +3,6 @@ import pygame
 import sys
 import json
 
-from guipyg import gui
 from guipyg.gui_element.menu import Menu
 from guipyg.gui_element.button import Button
 from guipyg.gui_element.element import ElementDecorators

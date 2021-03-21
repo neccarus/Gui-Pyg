@@ -24,6 +24,10 @@ class Element(pygame.Surface, Instance):
         element.id_ = cls.id_
         cls.id_ += 1
 
+    def update(self, *args, **kwargs):
+
+        pass
+
     # @classmethod
     # def new_element(cls, element):
     #     cls._element_dict[element.name] = element
