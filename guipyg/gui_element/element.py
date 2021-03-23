@@ -60,6 +60,7 @@ class Element(pygame.Surface, Instance):
         # self.drop_shadow_rect.center = self.rect.center
 
     # TODO: all inherited classes need to make proper use of **kwargs instead of writing them in each and every __init__
+    # TODO: offer an alternative placement of argument "center" to be able to center the Element when placed
     def __init__(self, width=0, height=0, pos_x=0, pos_y=0, name="Element", msg="", color=(255, 255, 255), style=None,
                  is_visible=True, font_color=(10, 10, 10), hide_text=False, **_):
         super().__init__((width, height), pygame.HWSURFACE)
@@ -270,6 +271,7 @@ class Element(pygame.Surface, Instance):
                     self.stored_function = getattr(self.import_module(), str(self.function))
 
         # TODO: functions don't seem to be working from json files again
+        # TODO: if the function being called has a return value, we should try and handle the internally
         def __call__(self, *args, **kwargs):
             if args or kwargs:
                 # print(self.args)
