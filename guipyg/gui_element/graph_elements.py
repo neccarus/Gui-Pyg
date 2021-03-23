@@ -1,6 +1,5 @@
 from .element_group import ElementGroup
 from .element import Element
-from .text_elements import Label
 from pygame import Vector2
 import pygame
 
@@ -29,6 +28,9 @@ class GraphElement(Element):
         self.high_position = high_position
         self.current_high_position = high_position
         self.ratio = self.current_value / self.high_value
+        self.rect = pygame.Rect(self.low_position, self.high_position)
+        self.pos_x = self.low_position[0]
+        self.pos_y = self.low_position[1]
         self.angle = angle
 
     def add_to_graph(self, graph):
@@ -53,17 +55,25 @@ class BarElement(GraphElement):
 
         super().__init__(*args, **kwargs)
         self.thickness = thickness
-        pygame.draw.rect(self, self.color, (self.low_position, self.current_high_position))
-        self.original = self.copy()
-        self.width, self.height = self.high_position
+        # pygame.draw.rect(self, self.color, (self.low_position, self.current_high_position))
+        # self.original = self.copy()
+        self.hide_text = True
+        self.has_border = False
+        # self.width, self.height = self.high_position
 
     def update(self, *args, **kwargs):
 
         super().update(*args, **kwargs)
-        self.current_high_position = Vector2((self.high_position[0] * self.ratio, self.high_position[1]))
+        self.current_high_position = Vector2((self.width * self.ratio, self.height))
 
         self.draw()
 
     def draw(self):
-        pygame.draw.rect(self.content_surface, self.color, (self.low_position, self.current_high_position))
-        self.content_surface = pygame.transform.rotate(self.original, self.angle)
+        self.content_surface = pygame.Surface((abs(self.content_rect.width), abs(self.content_rect.height)))
+        pygame.draw.rect(self.content_surface, self.color, (Vector2(0, 0), Vector2(self.current_high_position, self.height)))
+        self.content_surface = pygame.transform.rotate(self.content_surface, self.angle)
+
+    def blit_elements(self):
+
+        self.update()
+        super().blit_elements()

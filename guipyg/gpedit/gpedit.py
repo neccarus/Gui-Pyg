@@ -6,6 +6,8 @@ import json
 from guipyg.gui_element.menu import Menu
 from guipyg.gui_element.button import Button
 from guipyg.gui_element.element import ElementDecorators
+from guipyg.gui import GUI
+from guipyg.gui_element.graph_elements import BarElement
 
 if os.name == 'posix':
     os.environ['SDL_AUDIODRIVER'] = 'dsp'
@@ -37,7 +39,7 @@ screen = pygame.display.set_mode(screensize)
 clock = pygame.time.Clock()
 
 # build the GUI
-gpe_window = gui.GUI(*screensize, name="GPEdit", theme="blue_theme")
+gpe_window = GUI(*screensize, name="GPEdit", theme="blue_theme")
 gpe_menu = Menu(gpe_window.width, 20, 0, 0, "GPEdit_Menu", hide_text=True)
 
 # File Menu setup
@@ -58,6 +60,9 @@ new_menu = Menu(200, 500, new_button.pos_x, new_button.rect.bottom, name="New_Me
 
 new_element_button = Button(new_menu.width, 20, 0, 0, name="New_Element_Button", msg="New Element", function=empty_func)
 new_menu.elements = [new_element_button]
+
+# red_bar = BarElement(low_value=0, high_value=100, current_value=80, low_position=(600, 360), high_position=(750, 360),
+#                      angle=0, color=(255, 0, 0), width=150, height=10)
 
 
 gpe_menu.elements = [file_button, edit_button, new_button]
