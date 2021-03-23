@@ -16,7 +16,7 @@ class GraphElement(Element):
     def __init__(self, low_value=0, high_value=0, current_value=0,
                  empty_color=(0, 0, 0), related_object=None,
                  low_position=Vector2(0, 0), high_position=Vector2(0, 0),
-                 angle=0, *args, **kwargs):
+                 angle=0, graph_color=(255, 255, 255), *args, **kwargs):
 
         super().__init__(*args, **kwargs)
         self.low_value = low_value
@@ -77,3 +77,10 @@ class BarElement(GraphElement):
 
         self.update()
         super().blit_elements()
+        self.need_update = True
+
+    def fill_elements(self, surface):
+        if self.need_update:
+            if not self.corner_rounding:
+                self.fill(self.get_colorkey(), self.rect)
+                self.content_surface.fill(self.get_colorkey(), self.content_rect)
